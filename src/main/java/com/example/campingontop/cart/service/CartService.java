@@ -105,14 +105,16 @@ public class CartService {
             }
             return getCartDtoResList;
         }
-        throw new CartException(ErrorCode.CART_EMPTY);
+        return null;
     }
 
-    public void deleteCart(PatchDeleteCartDtoReq req) {
-        Cart cart = cartRepository.findByUserIdAndCartId(req.getUserId(), req.getCartId());
-        if (cart != null) {
+    public void deleteCart(Long deleteId) {
+        Optional<Cart> result = cartRepository.findById(deleteId);
+        if (result.isPresent()) {
+            Cart cart = result.get();
             cart.setStatus(false);
             cartRepository.save(cart);
+            return;
         }
         throw new CartException(ErrorCode.CART_NOT_EXIST);
     }

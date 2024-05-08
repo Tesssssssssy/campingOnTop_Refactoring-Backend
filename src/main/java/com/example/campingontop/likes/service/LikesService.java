@@ -120,7 +120,7 @@ public class LikesService {
                     ));
             return new GetLikesDtoRes(likesInfoMap);
         }
-        throw new LikesException(ErrorCode.LIKES_NOT_EXIST);
+        return null;
     }
 
     public void deleteLikes(Long likesId) {
