@@ -64,9 +64,9 @@ public class CartController {
             @ApiResponse(responseCode = "404", description = "해당 User가 존재하지 않음"),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
-    @PatchMapping("/delete")
-    public ResponseEntity deleteCart(@Valid @RequestBody PatchDeleteCartDtoReq req) {
-        cartService.deleteCart(req);
+    @PatchMapping("/delete/{deleteId}")
+    public ResponseEntity deleteCart(@PathVariable Long deleteId) {
+        cartService.deleteCart(deleteId);
         return ResponseEntity.ok().body("cart 삭제 성공");
     }
 }

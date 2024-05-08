@@ -121,7 +121,8 @@ public class UserService {
         helper.setSubject("[" + messageSubject1 + "] " + messageSubject2 + " " + messageSubject3);
 
         String accessToken = JwtUtils.generateAccessToken(req.getEmail(), req.getNickName(), req.getId(), secretKey);
-        String url = "http://www.campingontop.kro.kr/api/user/verify?email=" + req.getEmail() + "&token=" + token + "&jwt=" + accessToken;
+//        String url = "http://www.campingontop.kro.kr/api/user/verify?email=" + req.getEmail() + "&token=" + token + "&jwt=" + accessToken;
+        String url = "http://localhost:8080/user/verify?email=" + req.getEmail() + "&token=" + token + "&jwt=" + accessToken;
 
         String emailContent = "<html><body>"
                 + "<h1>CampingOnTop 메일 인증</h1>"
