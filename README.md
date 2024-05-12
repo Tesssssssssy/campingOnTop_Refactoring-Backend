@@ -10,9 +10,9 @@
 
 <div align="left">
 
-|                    **임태우**                    |                 **길민석**                 |                **한경훈**                |
-| :----------------------------------------------: | :----------------------------------------: | :--------------------------------------: | 
-| [@Tesssssssssy](https://github.com/Tesssssssssy) | [@gilms0730](https://github.com/gilms0730) | [@Kyungqq](https://github.com/Kyungqq) |
+|                    **임태우**                    |                 **길민석**                 | 
+| :----------------------------------------------: | :----------------------------------------: | 
+| [@Tesssssssssy](https://github.com/Tesssssssssy) | [@gilms0730](https://github.com/gilms0730) | 
 
 </div>
 
