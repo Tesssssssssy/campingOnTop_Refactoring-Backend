@@ -83,7 +83,7 @@ public class CartService {
         return existingCart.isPresent();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<GetCartDtoRes> getCartsByUserId(Long userId) {
         List<Cart> result = cartRepository.findByUserId(userId);
         List<GetCartDtoRes> getCartDtoResList = new ArrayList<>();
@@ -108,13 +108,14 @@ public class CartService {
         return null;
     }
 
-    public void deleteCart(Long deleteId) {
+    @Transactional
+    public Boolean deleteCart(Long deleteId) {
         Optional<Cart> result = cartRepository.findById(deleteId);
         if (result.isPresent()) {
             Cart cart = result.get();
             cart.setStatus(false);
             cartRepository.save(cart);
-            return;
+            return true;
         }
         throw new CartException(ErrorCode.CART_NOT_EXIST);
     }

@@ -66,7 +66,6 @@ public class CartController {
     })
     @PatchMapping("/delete/{deleteId}")
     public ResponseEntity deleteCart(@PathVariable Long deleteId) {
-        cartService.deleteCart(deleteId);
-        return ResponseEntity.ok().body("cart 삭제 성공");
+        return ResponseEntity.ok().body(cartService.deleteCart(deleteId));
     }
 }
