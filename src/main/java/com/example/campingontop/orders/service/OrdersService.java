@@ -1,162 +1,101 @@
 package com.example.campingontop.orders.service;
 
 import com.example.campingontop.cart.model.Cart;
-import com.example.campingontop.cart.model.dto.response.CreateCartReq;
 import com.example.campingontop.cart.repository.CartRepository;
+import com.example.campingontop.common.BaseResponse;
 import com.example.campingontop.exception.ErrorCode;
-import com.example.campingontop.exception.entityException.CartException;
+import com.example.campingontop.exception.entityException.UserException;
 import com.example.campingontop.house.model.House;
-import com.example.campingontop.house.model.response.GetFindHouseDtoRes;
-import com.example.campingontop.orderedHouse.model.OrderedHouse;
-import com.example.campingontop.orderedHouse.repository.OrderedHouseRepository;
+import com.example.campingontop.house.repository.HouseRepository;
+import com.example.campingontop.orders.model.OrderedHouse;
 import com.example.campingontop.orders.model.Orders;
-import com.example.campingontop.orders.model.dto.request.PostCreateOrdersDtoReq;
-import com.example.campingontop.orders.model.dto.response.PostCreateOrdersDtoRes;
+import com.example.campingontop.orders.model.PaymentHouses;
+import com.example.campingontop.orders.model.dto.response.GetOrdersListRes;
+import com.example.campingontop.orders.model.dto.response.GetPortOneRes;
+import com.example.campingontop.orders.model.dto.response.PostOrderInfoRes;
+import com.example.campingontop.orders.repository.OrderedHouseRespository;
 import com.example.campingontop.orders.repository.OrdersRepository;
 import com.example.campingontop.user.model.User;
+import com.example.campingontop.user.repository.queryDsl.UserRepository;
+import com.example.campingontop.utils.JwtUtils;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
-import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
 public class OrdersService {
-//    private final IamportClient iamportClient;
     private final OrdersRepository ordersRepository;
+    private final OrderedHouseRespository orderedHouseRepository;
+    private final PaymentService paymentService;
+    private final UserRepository userRepository;
+    private final HouseRepository houseRepository;
     private final CartRepository cartRepository;
-    private final OrderedHouseRepository orderedHouseRepository;
+
+    @Value("${jwt.secret-key}")
+    private String secretKey;
 
     @Transactional
-    public Boolean paymentValidation(PostCreateOrdersDtoReq req) throws IamportResponseException, IOException {
-//        IamportResponse<Payment> response = getPaymentInfo(req.getImpUid());
-//        Integer amount = response.getResponse().getAmount().intValue();
+    public BaseResponse<List<PostOrderInfoRes>> createOrder(User user, String impUid) throws IamportResponseException, IOException {
+        IamportResponse<Payment> iamportResponse = paymentService.getPaymentInfo(impUid);
+        Integer amount = iamportResponse.getResponse().getAmount().intValue();
+        String customDataString = iamportResponse.getResponse().getCustomData();
+        customDataString = "{\"carts\":" + customDataString + "}";
+        Gson gson = new Gson();
+        PaymentHouses paymentHouses = gson.fromJson(customDataString, PaymentHouses.class);
 
-        Optional<Cart> result = cartRepository.findById(req.getCartId());
-        Cart cart = null;
+        List<PostOrderInfoRes> orderList = new ArrayList<>();
+
+        Optional<User> result = userRepository.findByEmail(user.getEmail());
         if (result.isPresent()) {
-            cart = result.get();
+            Orders order = ordersRepository.save(Orders.toEntity(impUid, user.getEmail(), amount));
+
+            // Custom Data 안에 있던 House 리스트 하나씩 꺼내와서 OrderedHouse에 저장
+            for (GetPortOneRes getPortOneRes : paymentHouses.getCarts()) {
+                Cart cart = cartRepository.findById(getPortOneRes.getId())
+                        .orElseThrow(() -> new RuntimeException("cart not found with id: " + getPortOneRes.getId()));
+                orderedHouseRepository.save(OrderedHouse.toEntity(order, cart));
+
+                orderList.add(PostOrderInfoRes.toEntity(impUid, getPortOneRes, order));
+            }
+            return BaseResponse.successResponse("주문 완료", orderList);
         }
-        Integer totalPrice = cart.getPrice();
-
-//        if (amount.equals(totalPrice)) {
-//            createOrders(req);
-//            return true;
-//        }
-
-        return false;
+        throw new UserException(ErrorCode.MEMBER_NOT_EXIST);
     }
 
-
-
-    // 정보 가져오는 메소드로 사용하고 검증하는 메소드를 따로 만들자.
-//    public IamportResponse getPaymentInfo(String impUid) throws IamportResponseException, IOException {
-//        IamportResponse<Payment> response = iamportClient.paymentByImpUid(impUid);
-//
-//        return response;
-//    }
-
-    @Transactional
-    public PostCreateOrdersDtoRes createOrders(PostCreateOrdersDtoReq req) throws IamportResponseException, IOException {
-        Optional<Cart> cartResult = cartRepository.findById(req.getCartId());
-
-        if (cartResult.isPresent()) {
-            Cart cart = cartResult.get();
-
-            Orders orders = Orders.builder()
-                    .cart(cart)
-                    .impUid(req.getImpUid())
-                    .price(req.getAmount())
-                    .merchantUid(req.getMerchantUid())
-                    .paymentStatus(req.getPaymentStatus())
-                    .build();
-            orders = ordersRepository.save(orders);
-
-            // Set the reference in the Cart entity
-            cart.setOrders(orders);
-            cartRepository.save(cart);
-
-            House house = cart.getHouse();
-
-            OrderedHouse orderedHouse = OrderedHouse.builder()
-                    .orders(orders)
-                    .house(house)
-                    .build();
-
-            orders.getOrderedHouseList().add(orderedHouse);
-            orderedHouseRepository.save(orderedHouse);
-
-            PostCreateOrdersDtoRes dto = PostCreateOrdersDtoRes.builder()
-                    .id(orders.getId())
-                    .name(cart.getUser().getName())
-                    .email(cart.getUser().getEmail())
-                    .checkIn(cart.getCheckIn())
-                    .checkOut(cart.getCheckOut())
-                    .price(orders.getPrice())
-                    .paymentStatus(orders.getPaymentStatus())
-                    .merchantUid(orders.getMerchantUid())
-                    .houseDto(GetFindHouseDtoRes.toDto(house))
-                    .build();
-
-            return dto;
+    public BaseResponse<List<GetOrdersListRes>> orderList(User user) {
+        String email = user.getEmail();
+        List<GetOrdersListRes> result = new ArrayList<>();
+        if (email != null) {
+            List<Orders> ordersList = ordersRepository.findAllByConsumerEmailOrderByIdDesc(email);
+            for (Orders order : ordersList) {
+                for (OrderedHouse orderedHouse : order.getOrderedHouseList()) {
+                    Cart cart = orderedHouse.getCart();
+                    if (cart != null) {
+                        House house = cart.getHouse();
+                        if (house != null) {
+                            GetOrdersListRes orderDetails = GetOrdersListRes.toEntity(order, house, cart);
+                            result.add(orderDetails);
+                        }
+                    }
+                }
+            }
+            return BaseResponse.successResponse("주문 내역 조회.", result);
         } else {
-            throw new CartException(ErrorCode.CART_NOT_EXIST);
+            return BaseResponse.failResponse(500, "해당 이메일을 가진 유저가 존재하지 않습니다.");
         }
     }
-
-
-
-//    public List<PostCreateOrdersDtoRes> findOrdersList(User user) throws IamportResponseException, IOException {
-//        List<Orders> result = ordersRepository.findAllByCart_User(user);
-//        List<PostCreateOrdersDtoRes> dtoList = new ArrayList<>();
-//
-//        if (!result.isEmpty()) {
-//            for (Orders orders : result) {
-////                IamportResponse<Payment> response = getPaymentInfo(orders.getImpUid());
-////                String customData = response.getResponse().getCustomData();
-//
-//                Gson gson = new Gson();
-////                GetFindHouseDtoRes houseDto = gson.fromJson(customData, GetFindHouseDtoRes.class);
-//
-//                House house = House.builder()
-//                        .id(houseDto.getId())
-//                        .name(houseDto.getName())
-//                        .price(houseDto.getPrice())
-//                        .address(houseDto.getAddress())
-//                        .content(houseDto.getContent())
-//                        .build();
-//
-//                Cart cart = orders.getCart();
-//
-//                PostCreateOrdersDtoRes res = PostCreateOrdersDtoRes.builder()
-//                        .id(orders.getId())
-//                        .name(user.getName())
-//                        .email(user.getEmail())
-//                        .checkIn(cart.getCheckIn())
-//                        .checkOut(cart.getCheckOut())
-//                        .price(orders.getPrice())
-//                        .paymentStatus(orders.getPaymentStatus())
-//                        .merchantUid(orders.getMerchantUid())
-//                        .houseDto(GetFindHouseDtoRes.toDto(house))
-//                        .build();
-//
-//                dtoList.add(res);
-//            }
-//            return dtoList;
-//        }
-//        return Collections.emptyList();
-//    }
 }
 

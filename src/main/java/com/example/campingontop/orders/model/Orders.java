@@ -1,11 +1,10 @@
 package com.example.campingontop.orders.model;
 
 import com.example.campingontop.cart.model.Cart;
-import com.example.campingontop.orderedHouse.model.OrderedHouse;
-import com.example.campingontop.review.model.Review;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,26 +19,33 @@ public class Orders {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable=false)
     private String impUid;
 
-    private Integer price;
-    private String merchantUid;
-    private String paymentStatus;
+    @Column(nullable=false)
+    private LocalDate orderDate;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Cart_id")
-    private Cart cart;
+    private Integer price;
+
+    private Long consumerId;
+    private String consumerEmail;
+    private String consumerPassword;
+    private String consumerAddress;
+    private String consumerName;
+    private String consumerPhoneNum;
+
+    @OneToMany(mappedBy = "orders", fetch = FetchType.LAZY)
+    private List<Cart> cartList = new ArrayList<>();
 
     @OneToMany(mappedBy = "orders", fetch = FetchType.LAZY)
     private List<OrderedHouse> orderedHouseList = new ArrayList<>();
 
-    @OneToOne(mappedBy = "orders", fetch = FetchType.LAZY)
-    private Review review;
-
-    @PrePersist
-    public void prePersist() {
-        if (this.orderedHouseList == null) {
-            this.orderedHouseList = new ArrayList<>();
-        }
+    public static Orders toEntity(String impUid, String email, Integer price) {
+        return Orders.builder()
+                .impUid(impUid)
+                .consumerEmail(email)
+                .price(price)
+                .orderDate(LocalDate.now())
+                .build();
     }
 }
