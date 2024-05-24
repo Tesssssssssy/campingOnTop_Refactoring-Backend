@@ -2,7 +2,7 @@ package com.example.campingontop.house.model;
 
 import com.example.campingontop.houseImage.model.HouseImage;
 import com.example.campingontop.likes.model.Likes;
-import com.example.campingontop.orderedHouse.model.OrderedHouse;
+import com.example.campingontop.orders.model.OrderedHouse;
 import com.example.campingontop.user.model.User;
 import lombok.*;
 
@@ -75,9 +75,6 @@ public class House {
     private List<HouseImage> houseImageList = new ArrayList<>();
 
     @OneToMany(mappedBy = "house", fetch = FetchType.LAZY)
-    private List<OrderedHouse> orderedHouseList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "house", fetch = FetchType.LAZY)
     private List<Likes> likesList = new ArrayList<>();
 
 
@@ -95,5 +92,9 @@ public class House {
 
     public void increaseLikeCount() {
         this.likeCnt = this.likeCnt + 1;
+    }
+
+    public void decreaseLikeCount() {
+        this.likeCnt = this.likeCnt - 1;
     }
 }
