@@ -3,6 +3,9 @@ jwt:
   token:
     expired-time-ms: ${JWT_EXPIRED_TIME}
 
+imp:
+  apiKey: ${IMP_KEY}
+  secretKey: ${IMP_SECRET}
 
 spring:
   sql:
