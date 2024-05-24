@@ -3,7 +3,6 @@ package com.example.campingontop.likes.repository.queryDsl;
 import com.example.campingontop.likes.model.Likes;
 import com.example.campingontop.likes.model.QLikes;
 import com.example.campingontop.user.model.User;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.List;
