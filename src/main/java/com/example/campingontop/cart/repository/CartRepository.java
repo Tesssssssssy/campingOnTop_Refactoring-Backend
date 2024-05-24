@@ -16,7 +16,4 @@ public interface CartRepository extends JpaRepository<Cart, Long>, CartRepositor
     Optional<Cart> findByUser_IdAndHouse_IdAndCheckInLessThanEqualAndCheckOutGreaterThanEqual(
             Long userId, Long houseId, LocalDate checkOut, LocalDate checkIn);
 
-
-
-
 }
