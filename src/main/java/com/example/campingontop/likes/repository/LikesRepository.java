@@ -14,5 +14,5 @@ import java.util.Optional;
 public interface LikesRepository extends JpaRepository<Likes, Long>, LikesRepositoryCustom {
     List<Likes> findByUserId(Long userId);
 
-    boolean existsByUserIdAndHouseId(Long userId, Long HouseId);
+    Likes findByUserIdAndHouseId(Long userId, Long houseId);
 }

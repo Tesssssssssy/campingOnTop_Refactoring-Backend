@@ -2,6 +2,7 @@ package com.example.campingontop.likes.service;
 
 import com.example.campingontop.exception.ErrorCode;
 import com.example.campingontop.exception.entityException.LikesException;
+import com.example.campingontop.house.model.response.GetFindHouseDtoResForLikes;
 import com.example.campingontop.houseImage.model.HouseImage;
 import com.example.campingontop.likes.model.Likes;
 import com.example.campingontop.house.model.House;
@@ -35,9 +36,15 @@ public class LikesService {
 
     @Transactional
     public GetUserWithLikesDtoRes createLikes(PostCreateLikesDtoReq req) {
-        boolean exists = likesRepository.existsByUserIdAndHouseId(req.getUserId(), req.getHouseId());
+        Likes existingLike = likesRepository.findByUserIdAndHouseId(req.getUserId(), req.getHouseId());
 
-        if (!exists) {
+        if (existingLike != null) {
+            existingLike.setStatus(true);
+            House house = existingLike.getHouse();
+            house.increaseLikeCount();
+            houseRepository.save(house);
+            likesRepository.save(existingLike);
+        } else {
             User user = userRepository.findById(req.getUserId())
                     .orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다. user_id: " + req.getUserId()));
 
@@ -54,82 +61,71 @@ public class LikesService {
             house.increaseLikeCount();
             houseRepository.save(house);
 
-            House house1 = likes.getHouse();
-            List<HouseImage> houseImageList = house1.getHouseImageList();
-
-            List<String> filenames = new ArrayList<>();
-            for (HouseImage productImage : houseImageList) {
-                String filename = productImage.getFilename();
-                filenames.add(filename);
-            }
-
-            GetFindHouseDtoRes houseDto = GetFindHouseDtoRes.toDto(house1, filenames);
-
-            GetUserWithLikesDtoRes res = GetUserWithLikesDtoRes.builder()
-                    .id(likes.getId())
-                    .email(likes.getUser().getEmail())
-                    .name(likes.getUser().getName())
-                    .likedHouse(houseDto)
-                    .build();
-
-            return res;
+            existingLike = likes;
         }
-        throw new LikesException(ErrorCode.DUPLICATED_LIKES);
+
+        House house1 = existingLike.getHouse();
+        List<HouseImage> houseImageList = house1.getHouseImageList();
+
+        List<String> filenames = new ArrayList<>();
+        for (HouseImage productImage : houseImageList) {
+            String filename = productImage.getFilename();
+            filenames.add(filename);
+        }
+
+        GetFindHouseDtoRes houseDto = GetFindHouseDtoRes.toDto(house1, filenames);
+
+        GetUserWithLikesDtoRes res = GetUserWithLikesDtoRes.builder()
+                .id(existingLike.getId())
+                .email(existingLike.getUser().getEmail())
+                .name(existingLike.getUser().getName())
+                .likedHouse(houseDto)
+                .build();
+
+        return res;
     }
 
     @Transactional(readOnly = true)
     public GetLikesDtoRes findLikesByUserId(Long userId) {
-        /*
         List<Likes> list = likesRepository.findLikesByUserId(userId);
         if (!list.isEmpty()) {
-            List<GetFindHouseDtoRes> list1 = list.stream()
+            List<GetFindHouseDtoResForLikes> likesInfoList = list.stream()
                     .map(likes -> {
                         House house = likes.getHouse();
                         List<HouseImage> houseImageList = house.getHouseImageList();
-
                         List<String> filenames = houseImageList.stream()
                                 .map(HouseImage::getFilename)
                                 .collect(Collectors.toList());
-
-                        return GetFindHouseDtoRes.toDto(house, filenames);
+                        return GetFindHouseDtoResForLikes.builder()
+                                .id(likes.getId())
+                                .houseId(house.getId())
+                                .houseName(house.getName())
+                                .address(house.getAddress())
+                                .price(house.getPrice())
+                                .filenames(filenames)
+                                .build();
                     })
                     .collect(Collectors.toList());
-
             return GetLikesDtoRes.builder()
-                    .id(list.get(0).getId())
-                    .email(list.get(0).getUser().getEmail())
-                    .name(list.get(0).getUser().getName())
-                    .houseDtoResList(list1)
+                    .likesList(likesInfoList)
                     .build();
-        }
-        throw new LikesException(ErrorCode.LIKES_NOT_EXIST);
-        */
-        List<Likes> list = likesRepository.findLikesByUserId(userId);
-        if (!list.isEmpty()) {
-            Map<Long, GetFindHouseDtoRes> likesInfoMap = list.stream()
-                    .collect(Collectors.toMap(
-                            Likes::getId,
-                            likes -> {
-                                House house = likes.getHouse();
-                                List<HouseImage> houseImageList = house.getHouseImageList();
-                                List<String> filenames = houseImageList.stream()
-                                        .map(HouseImage::getFilename)
-                                        .collect(Collectors.toList());
-                                return GetFindHouseDtoRes.toDto(house, filenames);
-                            }
-                    ));
-            return new GetLikesDtoRes(likesInfoMap);
         }
         return null;
     }
 
-    public void deleteLikes(Long likesId) {
+    @Transactional
+    public Boolean deleteLikes(Long likesId) {
         Optional<Likes> result = likesRepository.findById(likesId);
         if (result.isPresent()) {
             Likes likes = result.get();
             likes.setStatus(false);
             likesRepository.save(likes);
-            return;
+
+            House house = likes.getHouse();
+            house.decreaseLikeCount();
+            houseRepository.save(house);
+
+            return true;
         }
         throw new LikesException(ErrorCode.LIKES_NOT_EXIST);
     }
