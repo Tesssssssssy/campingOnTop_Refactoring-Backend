@@ -1,7 +1,6 @@
-package com.example.campingontop.orderedHouse.model;
+package com.example.campingontop.orders.model;
 
-import com.example.campingontop.house.model.House;
-import com.example.campingontop.orders.model.Orders;
+import com.example.campingontop.cart.model.Cart;
 import lombok.*;
 
 import javax.persistence.*;
@@ -22,6 +21,13 @@ public class OrderedHouse {
     private Orders orders;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "House_id")
-    private House house;
+    @JoinColumn(name = "Cart_id")
+    private Cart cart;
+
+    public static OrderedHouse toEntity(Orders orders, Cart cart) {
+        return OrderedHouse.builder()
+                .orders(orders)
+                .cart(cart)
+                .build();
+    }
 }
