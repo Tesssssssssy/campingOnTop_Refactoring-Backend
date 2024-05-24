@@ -32,7 +32,8 @@ public class Cart {
     @JoinColumn(name = "House_id")
     private House house;
 
-    @OneToOne(mappedBy = "cart")
+    @ManyToOne
+    @JoinColumn(name = "Orders_id")
     private Orders orders;
 
 
