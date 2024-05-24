@@ -3,6 +3,9 @@ jwt:
   token:
     expired-time-ms: ${JWT_EXPIRED_TIME}
 
+imp:
+  apiKey: ${IMP_KEY}
+  secretKey: ${IMP_SECRET}
 
 spring:
   sql:
@@ -37,7 +40,7 @@ spring:
     open-in-view: true
     database: mysql
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
