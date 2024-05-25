@@ -43,6 +43,9 @@ public class UserService {
     @Value("${jwt.secret-key}")
     private String secretKey;
 
+    @Value("${jwt.token.expired-time-ms}")
+    public Integer expiredMs;
+
     @Value("${message.set.from}")
     private String originEmail;
 
@@ -120,7 +123,7 @@ public class UserService {
         helper.setSentDate(new Date(System.currentTimeMillis()));
         helper.setSubject("[" + messageSubject1 + "] " + messageSubject2 + " " + messageSubject3);
 
-        String accessToken = JwtUtils.generateAccessToken(req.getEmail(), req.getNickName(), req.getId(), secretKey);
+        String accessToken = JwtUtils.generateAccessToken(req.getEmail(), req.getNickName(), req.getId(), secretKey, expiredMs);
 //        String url = "http://www.campingontop.kro.kr/api/user/verify?email=" + req.getEmail() + "&token=" + token + "&jwt=" + accessToken;
         String url = "http://localhost:8080/user/verify?email=" + req.getEmail() + "&token=" + token + "&jwt=" + accessToken;
 
@@ -147,7 +150,7 @@ public class UserService {
             String email = ((User) authentication.getPrincipal()).getEmail();
             String nickname = ((User) authentication.getPrincipal()).getNickName();
 
-            String jwt = JwtUtils.generateAccessToken(email, nickname, id, secretKey);
+            String jwt = JwtUtils.generateAccessToken(email, nickname, id, secretKey, expiredMs);
 
             PostLoginUserDtoRes loginRes = PostLoginUserDtoRes.builder()
                     .token(jwt)

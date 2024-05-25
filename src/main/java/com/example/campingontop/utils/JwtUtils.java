@@ -4,12 +4,16 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.security.Key;
 import java.util.Date;
 
 public class JwtUtils {
-    public static String generateAccessToken(String email, String nickname, Long id, String key) {
+    @Value("${jwt.token.expired-time-ms}")
+    public Integer expiredMs;
+
+    public static String generateAccessToken(String email, String nickname, Long id, String key, Integer expiredMs) {
         Claims claims = Jwts.claims();
         claims.put("email", email);
         claims.put("nickname", nickname);
@@ -18,7 +22,7 @@ public class JwtUtils {
         String token = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date((System.currentTimeMillis() + 3600000) * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(getSignKey(key), SignatureAlgorithm.HS256)
                 .compact();
 
