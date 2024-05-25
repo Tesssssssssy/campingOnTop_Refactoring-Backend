@@ -1,7 +1,7 @@
 jwt:
   secret-key: ${JWT_SECRET}
   token:
-    expired-time-ms: ${JWT_EXPIRED_TIME}
+    expired-time-ms: ${JWT_TOKEN_EXPIRED_TIME}
 
 imp:
   apiKey: ${IMP_KEY}

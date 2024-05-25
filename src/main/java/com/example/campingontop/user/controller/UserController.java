@@ -77,9 +77,11 @@ public class UserController {
     public RedirectView confirm(@Valid @ModelAttribute PostEmailConfirmDtoReq req) {
         if (emailVerifyService.verify(req)) {
             userService.updateMemberStatus(req.getEmail());
-            return new RedirectView("http://www.campingontop.kro.kr/");
+//            return new RedirectView("http://www.campingontop.kro.kr/");
+            return new RedirectView("http://localhost:8080/");
         } else {
-            return new RedirectView("http://www.campingontop.kro.kr/email/verify");
+//            return new RedirectView("http://www.campingontop.kro.kr/email/verify");
+            return new RedirectView("http://localhost:8080/email/verify");
         }
     }
 
