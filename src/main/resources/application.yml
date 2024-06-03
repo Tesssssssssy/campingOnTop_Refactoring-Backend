@@ -12,17 +12,6 @@ spring:
     host: ${REDIS_HOST}
     port: ${REDIS_PORT}
 
-  kafka:
-    bootstrap-servers: ${KAFKA_SERVER} # Kafka 서버 주소 (Docker 외부에서 접근 가능)
-    consumer:
-      group-id: reservation-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-
   sql:
     init:
       mode: always
@@ -79,4 +68,4 @@ cloud:
 
 logging:
   level:
-    org.springframework.web: DEBUG
+    org.springframework.web: debug
