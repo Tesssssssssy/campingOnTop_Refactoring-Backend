@@ -1,12 +1,11 @@
-package com.example.campingontop.coupon.model;
+package com.example.campingontop.userCoupon.model;
 
-import com.example.campingontop.coupon.constant.Event;
+import com.example.campingontop.coupon.model.Coupon;
 import com.example.campingontop.user.model.User;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -14,17 +13,18 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Coupon {
+public class UserCoupon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Event event;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(nullable = false)
-    private Integer price;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "coupon_id", nullable = false)
+    private Coupon coupon;
 
     @Column(nullable = false, updatable = false)
     private Date createdAt;
