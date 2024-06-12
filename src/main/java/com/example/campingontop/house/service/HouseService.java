@@ -113,8 +113,7 @@ public class HouseService {
 
 
     public List<GetFindHouseDtoRes> getNearestHouseList(GetHouseListPagingByLocReq req){
-        Pageable pageable = PageRequest.of(req.getPage()-1, req.getSize());
-        Page<House> result = houseRepository.getNearestHouseList(pageable, req.getLatitude(), req.getLongitude());
+        List<House> result = houseRepository.getNearestHouseList(req.getLatitude(), req.getLongitude());
 
         List<GetFindHouseDtoRes> houseList = new ArrayList<>();
 
