@@ -8,5 +8,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "EmailCert", url = "http://localhost:8082/emailcert/verify")
 public interface OpenFeignVerifyEmailCertClient {
     @GetMapping
-    VerifyEmailCert call(@RequestParam String email, @RequestParam String uuid);
+    VerifyEmailCert call(@RequestParam("email") String email, @RequestParam("uuid") String uuid);
 }
