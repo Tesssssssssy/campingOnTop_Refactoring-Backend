@@ -14,8 +14,8 @@ import javax.validation.constraints.Pattern;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class PostCreateUserDtoReq {
@@ -44,11 +44,11 @@ public class PostCreateUserDtoReq {
     @ApiParam(value = "핸드폰 번호", required = true, example = "010-1111-2222")
     private String phoneNum;
 
-    @ApiParam(value = "성별", example = "M | F", required = false)
+    @ApiParam(value = "성별", example = "M | F", required = true)
     private String gender;
 
 
     @Pattern(regexp = "^([12]\\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01]))$")
-    @ApiParam(value = "생년월일", required = true, example = "2023-12-29")
+    @ApiParam(value = "생년월일", required = false, example = "2023-12-29")
     private String birthDay;
 }

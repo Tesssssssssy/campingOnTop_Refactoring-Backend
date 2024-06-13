@@ -78,10 +78,10 @@ public class UserController {
         if (emailVerifyService.verify(req)) {
             userService.updateMemberStatus(req.getEmail());
 //            return new RedirectView("http://www.campingontop.kro.kr/");
-            return new RedirectView("http://localhost:8080/");
+            return new RedirectView("http://localhost:8081/");
         } else {
 //            return new RedirectView("http://www.campingontop.kro.kr/email/verify");
-            return new RedirectView("http://localhost:8080/email/verify");
+            return new RedirectView("http://localhost:8081/email/verify");
         }
     }
 
