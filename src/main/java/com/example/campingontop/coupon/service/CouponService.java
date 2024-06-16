@@ -124,6 +124,7 @@ public class CouponService {
         userCouponRepository.save(UserCoupon.builder()
                 .user(user)
                 .coupon(coupon)
+                .isUsed(false)
                 .build());
         log.info("'{}'에게 {} 쿠폰이 발급되었습니다", user.getName(), event.name());
     }
@@ -143,6 +144,7 @@ public class CouponService {
     // 쿠폰 발급 내역 조회
     public List<GetCouponRes> getUserCoupons(User user) {
         return userCouponRepository.findByUser(user).stream()
+                .filter(userCoupon -> !userCoupon.isUsed())  // Only include unused coupons
                 .map(userCoupon -> GetCouponRes.builder()
                         .id(userCoupon.getCoupon().getId())
                         .eventName(userCoupon.getCoupon().getEvent().name())

@@ -29,6 +29,8 @@ public class UserCoupon {
     @Column(nullable = false, updatable = false)
     private Date createdAt;
 
+    private boolean isUsed;
+
     @PrePersist
     void createdAt() {
         this.createdAt = new Date();

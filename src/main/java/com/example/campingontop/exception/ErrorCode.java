@@ -49,6 +49,8 @@ public enum ErrorCode {
     ORDERS_NOT_EXIST(HttpStatus.NOT_FOUND, "해당 주문 내역이 존재하지 않습니다."),
     NOT_MATCH_AMOUNT(HttpStatus.BAD_REQUEST, "가격이 일치하지 않습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러"),
+
+    INVALID_JSON_FORMAT(HttpStatus.INTERNAL_SERVER_ERROR, "올바르지 않은 JSON 형식"),
     ;
 
     public HttpStatus getStatus() {

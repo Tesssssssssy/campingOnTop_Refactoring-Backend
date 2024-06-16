@@ -76,9 +76,8 @@ public class PaymentService {
     }
 
     //결제 정보를 가져옴
-    public IamportResponse getPaymentInfo(String impUid) throws IamportResponseException, IOException {
-        IamportResponse<Payment> response = iamportClient.paymentByImpUid(impUid);
-        return response;
+    public IamportResponse<Payment> getPaymentInfo(String impUid) throws IamportResponseException, IOException {
+        return iamportClient.paymentByImpUid(impUid);
     }
 
     private Integer getTotalPrice(List<GetPortOneRes> datas){
@@ -98,6 +97,19 @@ public class PaymentService {
     }
 
     //Portone에서 결제 정보 가져와서 검증 처리
+    public Boolean paymentValidation(String impUid, Integer finalAmount) throws IamportResponseException, IOException {
+        IamportResponse<Payment> response = getPaymentInfo(impUid);
+        Integer expectedAmount = response.getResponse().getAmount().intValue();
+
+        if (finalAmount.equals(expectedAmount)) {
+            return true;
+        } else {
+            log.error("Mismatch in amounts. Expected: {}, Received: {}", expectedAmount, finalAmount);
+            return false;
+        }
+    }
+
+    /*
     public Boolean paymentValidation(String impUid) throws IamportResponseException, IOException {
         IamportResponse<Payment> response = getPaymentInfo(impUid);
         Integer amount = response.getResponse().getAmount().intValue();
@@ -116,6 +128,8 @@ public class PaymentService {
         }
         return false;
     }
+    */
+
 
     public BaseResponse<String> paymentCancel(String impUid) throws IOException {
         String token = getToken();

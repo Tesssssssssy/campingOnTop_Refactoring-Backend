@@ -1,6 +1,7 @@
 package com.example.campingontop.orders.controller;
 
 import com.example.campingontop.common.BaseResponse;
+import com.example.campingontop.coupon.service.CouponService;
 import com.example.campingontop.exception.ErrorCode;
 import com.example.campingontop.exception.entityException.OrdersException;
 import com.example.campingontop.orders.model.dto.response.GetOrdersListRes;
@@ -32,6 +33,7 @@ import java.util.Map;
 @RequestMapping("/orders")
 public class OrdersController {
     private final OrdersService ordersService;
+    private final CouponService couponService;
     private final PaymentService paymentService;
 
     @ApiOperation(value = "상품 주문")
@@ -44,11 +46,12 @@ public class OrdersController {
     public BaseResponse<List<PostOrderInfoRes>> ordersCreate(@AuthenticationPrincipal User user,
                                                              @RequestBody Map<String, String> requestBody) {
         String impUid = requestBody.get("impUid");
-        log.info("Received impUid for validation: {}", impUid);
+        Integer finalAmount = Integer.parseInt(requestBody.get("finalAmount"));
+        log.info("Received impUid for validation: {}, finalAmount: {}", impUid, finalAmount);
         try {
-            if(paymentService.paymentValidation(impUid)){
+            if(paymentService.paymentValidation(impUid, finalAmount)){
                 log.info("Payment validation successful, creating order...");
-                return ordersService.createOrder(user, impUid);
+                return ordersService.createOrder(user, impUid, finalAmount);
             } else {
                 log.error("Payment validation failed for impUid: {}", impUid);
                 throw new OrdersException(ErrorCode.NOT_MATCH_AMOUNT);
@@ -64,8 +67,8 @@ public class OrdersController {
     @ApiOperation(value = "주문 내역 조회")
     @ApiImplicitParam(name = "email", value = "이메일을 받기 위한 토큰 입력",
             required = true, paramType = "query", dataType = "string", defaultValue = "")
-    @RequestMapping(method = RequestMethod.GET,value = "/list")
-    public BaseResponse<List<GetOrdersListRes>>  orderList(@AuthenticationPrincipal User user) {
+    @RequestMapping(method = RequestMethod.GET, value = "/list")
+    public BaseResponse<List<GetOrdersListRes>> orderList(@AuthenticationPrincipal User user) {
         return ordersService.orderList(user);
     }
 
@@ -74,7 +77,7 @@ public class OrdersController {
     @ApiImplicitParams(
             @ApiImplicitParam(name = "impUid", value = "취소할 주문의 주문 번호 입력",
                     required = true, paramType = "query", dataType = "string", defaultValue = ""))
-    @RequestMapping(method = RequestMethod.GET,value = "/cancel")
+    @RequestMapping(method = RequestMethod.GET, value = "/cancel")
     public BaseResponse<String> orderCancel(String impUid) throws IOException {
         return paymentService.paymentCancel(impUid);
     }

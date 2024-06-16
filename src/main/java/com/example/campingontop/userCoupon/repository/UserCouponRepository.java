@@ -1,6 +1,7 @@
 package com.example.campingontop.userCoupon.repository;
 
 import com.example.campingontop.coupon.constant.Event;
+import com.example.campingontop.coupon.model.Coupon;
 import com.example.campingontop.user.model.User;
 import com.example.campingontop.userCoupon.model.UserCoupon;
 import org.springframework.data.jpa.repository.JpaRepository;
