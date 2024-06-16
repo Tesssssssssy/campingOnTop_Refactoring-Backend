@@ -42,7 +42,7 @@ public class CouponController {
         // 큐에 추가 후 실제 쿠폰 발급 처리
         couponService.processQueue(event);
 
-        return ResponseEntity.ok("쿠폰 요청이 대기열에 추가되었습니다.");
+        return ResponseEntity.ok("쿠폰이 발급되었습니다.");
     }
 
     @GetMapping("/my")
