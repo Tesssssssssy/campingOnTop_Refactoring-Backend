@@ -112,8 +112,8 @@ public class HouseService {
     }
 
 
-    public List<GetFindHouseDtoRes> getNearestHouseList(GetHouseListPagingByLocReq req){
-        List<House> result = houseRepository.getNearestHouseList(req.getLatitude(), req.getLongitude());
+    public List<GetFindHouseDtoRes> getNearestHouseList(Double latitude, Double longitude){
+        List<House> result = houseRepository.getNearestHouseList(latitude, longitude);
 
         List<GetFindHouseDtoRes> houseList = new ArrayList<>();
 

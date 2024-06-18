@@ -126,9 +126,10 @@ public class HouseController {
             @ApiResponse(responseCode = "500",description = "서버 내부 오류")})
     @GetMapping("/find/location")
     public ResponseEntity getNearestHouseList(
-            @Valid @RequestBody GetHouseListPagingByLocReq req
+            @Valid @RequestParam Double latitude,
+            @Valid @RequestParam Double longitude
     ) {
-        return ResponseEntity.ok().body(houseService.getNearestHouseList(req));
+        return ResponseEntity.ok().body(houseService.getNearestHouseList(latitude,longitude));
     }
 
 
