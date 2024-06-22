@@ -12,9 +12,11 @@ import com.example.campingontop.user.model.request.SendEmailDtoReq;
 import com.example.campingontop.user.model.response.*;
 import com.example.campingontop.user.repository.queryDsl.UserRepository;
 import com.example.campingontop.utils.JwtUtils;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -37,12 +40,16 @@ public class UserService {
     private final JavaMailSender emailSender;
     private final EmailVerifyService emailVerifyService;
     // private final KafkaTemplate kafkaTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Value("${jwt.secret-key}")
     private String secretKey;
 
     @Value("${jwt.token.expired-time-ms}")
     public Integer expiredMs;
+
+    @Value("${jwt.token.refresh-expired-time}")
+    public Integer refreshExpiredMs; // 604800000 (1주일)
 
     @Value("${message.set.from}")
     private String originEmail;
@@ -149,14 +156,42 @@ public class UserService {
             String nickname = ((User) authentication.getPrincipal()).getNickName();
 
             String jwt = JwtUtils.generateAccessToken(email, nickname, id, secretKey, expiredMs);
+            String refreshToken = JwtUtils.generateRefreshToken(email, nickname, id, secretKey, refreshExpiredMs);
+
+            redisTemplate.opsForValue().set("REFRESH_TOKEN_" + id, refreshToken, refreshExpiredMs, TimeUnit.MILLISECONDS);
 
             PostLoginUserDtoRes loginRes = PostLoginUserDtoRes.builder()
                     .token(jwt)
+                    .refreshToken(refreshToken)
                     .build();
 
             return loginRes;
         }
         throw new UserException(ErrorCode.AUTHENTICATION_FAIL);
+    }
+
+    public PostLoginUserDtoRes refreshToken(String refreshToken) {
+        Claims claims = JwtUtils.extractAllClaims(refreshToken, secretKey);
+        String email = claims.get("email", String.class);
+        String nickName = claims.get("nickname", String.class);
+        Long id = claims.get("id", Long.class);
+
+        String storedRefreshToken = redisTemplate.opsForValue().get("REFRESH_TOKEN_" + id);
+        if (storedRefreshToken != null && storedRefreshToken.equals(refreshToken) && JwtUtils.validate(refreshToken, secretKey)) {
+            // 새로운 access token과 refresh token 발급 (보안 강화)
+            String newAccessToken = JwtUtils.generateAccessToken(email, nickName, id, secretKey, expiredMs);
+            String newRefreshToken = JwtUtils.generateRefreshToken(email, nickName, id, secretKey, refreshExpiredMs);
+
+            // 저장되어 있는 refresh token 갱신
+            redisTemplate.opsForValue().set("REFRESH_TOKEN_" + id, newRefreshToken, refreshExpiredMs, TimeUnit.MILLISECONDS);
+
+            return PostLoginUserDtoRes.builder()
+                    .token(newAccessToken)
+                    .refreshToken(newRefreshToken)
+                    .build();
+        } else {
+            throw new UserException(ErrorCode.AUTHENTICATION_FAIL);
+        }
     }
 
 

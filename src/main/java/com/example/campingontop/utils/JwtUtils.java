@@ -29,6 +29,22 @@ public class JwtUtils {
         return token;
     }
 
+    public static String generateRefreshToken(String email, String nickname, Long id, String key, Integer refreshExpiredMs) {
+        Claims claims = Jwts.claims();
+        claims.put("email", email);
+        claims.put("nickname", nickname);
+        claims.put("id", id);
+
+        String token = Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + refreshExpiredMs))
+                .signWith(getSignKey(key), SignatureAlgorithm.HS256)
+                .compact();
+
+        return token;
+    }
+
     public static Key getSignKey(String secretKey) {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
