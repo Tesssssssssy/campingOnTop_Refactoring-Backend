@@ -1,5 +1,6 @@
 package com.example.campingontop.user.controller;
 
+import com.example.campingontop.exception.entityException.UserException;
 import com.example.campingontop.user.model.request.PostCreateUserDtoReq;
 import com.example.campingontop.user.model.request.PostEmailConfirmDtoReq;
 import com.example.campingontop.user.model.request.PostLoginUserDtoReq;
@@ -15,13 +16,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 import javax.mail.MessagingException;
 import javax.validation.Valid;
-import java.util.List;
+import java.util.Map;
 
 @Tag(name="User", description = "User CRUD")
 @Api(tags = "User")
@@ -65,6 +67,19 @@ public class UserController {
     @PostMapping( "/login")
     public ResponseEntity login(@Valid @RequestBody PostLoginUserDtoReq req) {
         return ResponseEntity.ok().body(userService.login(req));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<PostLoginUserDtoRes> refreshToken(@RequestBody Map<String, String> refreshTokenRequest) {
+        String refreshToken = refreshTokenRequest.get("refreshToken");
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            return ResponseEntity.ok(userService.refreshToken(refreshToken));
+        } catch (UserException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
 

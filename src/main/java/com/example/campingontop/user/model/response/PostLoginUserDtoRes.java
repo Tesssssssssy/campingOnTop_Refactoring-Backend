@@ -7,4 +7,5 @@ import lombok.Data;
 @Builder
 public class PostLoginUserDtoRes {
     private String token;
+    private String refreshToken;
 }
