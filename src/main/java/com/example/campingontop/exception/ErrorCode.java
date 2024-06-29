@@ -44,6 +44,8 @@ public enum ErrorCode {
 
     REVIEW_NOT_EXIST(HttpStatus.NOT_FOUND,"해당 리뷰가 존재하지 않습니다."),
 
+    DUPLICATE_REVIEW(HttpStatus.CONFLICT,"해당 리뷰가 존재합니다."),
+
 
     // Orders 관련 에러
     ORDERS_NOT_EXIST(HttpStatus.NOT_FOUND, "해당 주문 내역이 존재하지 않습니다."),

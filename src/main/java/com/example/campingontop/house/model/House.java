@@ -3,6 +3,7 @@ package com.example.campingontop.house.model;
 import com.example.campingontop.houseImage.model.HouseImage;
 import com.example.campingontop.likes.model.Likes;
 import com.example.campingontop.orders.model.OrderedHouse;
+import com.example.campingontop.review.model.Review;
 import com.example.campingontop.user.model.User;
 import lombok.*;
 
@@ -77,6 +78,8 @@ public class House {
     @OneToMany(mappedBy = "house", fetch = FetchType.LAZY)
     private List<Likes> likesList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY)
+    private List<Review> reviewList = new ArrayList<>();
 
     @PrePersist
     void createdAt() {
