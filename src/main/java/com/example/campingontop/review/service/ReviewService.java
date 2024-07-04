@@ -89,6 +89,7 @@ public class ReviewService {
 
         for(Review review : list){
             GetFindReviewByUserIdDtoRes getFindReviewByUserIdDtoRes = GetFindReviewByUserIdDtoRes.builder()
+                    .reviewId(review.getId())
                     .houseName(review.getOrderedHouse().getCart().getHouse().getName())
                     .ordersNum(review.getOrderedHouse().getOrders().getId())
                     .reviewContent(review.getContent())
@@ -163,7 +164,7 @@ public class ReviewService {
             Review review = result.get();
             review.setStatus(false);
             reviewRepository.save(review);
-
+            
             House house = review.getOrderedHouse().getCart().getHouse();
             house.decreaseReviewCount();
             houseRepository.save(house);

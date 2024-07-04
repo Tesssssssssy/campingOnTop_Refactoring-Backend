@@ -4,7 +4,6 @@ import com.example.campingontop.cart.model.QCart;
 import com.example.campingontop.orders.model.QOrderedHouse;
 import com.example.campingontop.review.model.QReview;
 import com.example.campingontop.review.model.Review;
-import com.example.campingontop.user.model.User;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
@@ -53,7 +52,7 @@ public class ReviewRepositoryCustomImpl extends QuerydslRepositorySupport implem
 
         return from(qReview)
                 .leftJoin(qReview.orderedHouse).fetchJoin()
-                .where(qReview.status.eq(true).and(qReview.orderedHouse.id.eq(orderedHouseId)))
+                .where(qReview.orderedHouse.id.eq(orderedHouseId))
                 .fetch();
     }
 }

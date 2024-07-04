@@ -10,7 +10,6 @@ import javax.persistence.Column;
 @AllArgsConstructor
 @Builder
 public class PostCreateReviewDtoReq {
-
     private Long orderedHouseId;
     private String content;
     private Integer stars;

@@ -9,6 +9,8 @@ import java.util.Date;
 @Builder
 public class GetFindReviewByUserIdDtoRes {
 
+    private Long reviewId;
+
     private String houseName;
 
     private Long ordersNum;

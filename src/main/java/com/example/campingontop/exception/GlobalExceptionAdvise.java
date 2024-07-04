@@ -44,6 +44,12 @@ public class GlobalExceptionAdvise extends ResponseEntityExceptionHandler {
         return makeResponseEntity(e.getErrorCode());
     }
 
+    @ExceptionHandler(ReviewException.class)
+    public ResponseEntity handleOrdersException(ReviewException e) {
+        log.error("ReviewException : [{}] - {}", e.getErrorCode().getStatus(), e.getMessage());
+        return makeResponseEntity(e.getErrorCode());
+    }
+
     @Override
     protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         return makeResponseEntity(ErrorCode.INVALID_INPUT);
