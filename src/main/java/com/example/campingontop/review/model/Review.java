@@ -1,8 +1,6 @@
 package com.example.campingontop.review.model;
 
-import com.example.campingontop.house.model.House;
 import com.example.campingontop.orders.model.OrderedHouse;
-import com.example.campingontop.orders.model.Orders;
 import com.example.campingontop.user.model.User;
 import lombok.*;
 import org.hibernate.annotations.Comment;
@@ -42,6 +40,7 @@ public class Review {
     @JoinColumn(name = "User_id")
     private User user;
 
-    @OneToOne(mappedBy = "review", fetch = FetchType.LAZY)
+    @OneToOne
+    @JoinColumn(name = "orderedHouse_id")
     private OrderedHouse orderedHouse;
 }

@@ -63,6 +63,8 @@ public class House {
 
     private Integer likeCnt;
 
+    private Integer reviewCnt;
+
     @Column(updatable = false, nullable = false)
     private Date createdAt;
 
@@ -77,9 +79,6 @@ public class House {
 
     @OneToMany(mappedBy = "house", fetch = FetchType.LAZY)
     private List<Likes> likesList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY)
-    private List<Review> reviewList = new ArrayList<>();
 
     @PrePersist
     void createdAt() {
@@ -100,4 +99,8 @@ public class House {
     public void decreaseLikeCount() {
         this.likeCnt = this.likeCnt - 1;
     }
+
+    public void increseReviewCount() {this.reviewCnt = this.reviewCnt + 1; }
+
+    public void decreaseReviewCount() {this.reviewCnt = this.reviewCnt - 1; }
 }

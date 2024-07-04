@@ -25,7 +25,7 @@ public class OrderedHouse {
     @JoinColumn(name = "Cart_id")
     private Cart cart;
 
-    @OneToOne(mappedBy = "review", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "orderedHouse", fetch = FetchType.LAZY)
     private Review review;
 
     public static OrderedHouse toEntity(Orders orders, Cart cart) {

@@ -175,6 +175,7 @@ public class HouseService {
                 .user(user)
                 .status(true)
                 .likeCnt(0)
+                .reviewCnt(0)
                 .build();
 
         house = houseRepository.save(house);
