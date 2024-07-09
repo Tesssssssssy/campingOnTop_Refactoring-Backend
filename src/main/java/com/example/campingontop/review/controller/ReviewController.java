@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,8 +37,7 @@ public class ReviewController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @PostMapping("/create")
-    public ResponseEntity createReview(@Valid @RequestBody PostCreateReviewDtoReq postCreateReviewDtoReq) {
-        User user = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+    public ResponseEntity createReview(@Valid @RequestBody PostCreateReviewDtoReq postCreateReviewDtoReq, @AuthenticationPrincipal User user) {
         return ResponseEntity.ok().body(reviewService.createReview(user, postCreateReviewDtoReq));
     }
 
@@ -48,8 +48,7 @@ public class ReviewController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @GetMapping("/mylist")
-    public ResponseEntity findReview () {
-        User user = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+    public ResponseEntity findReview (@AuthenticationPrincipal User user) {
         return ResponseEntity.ok().body(reviewService.findReviewByUserId(user));
     }
 
@@ -71,8 +70,7 @@ public class ReviewController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @PatchMapping("/update")
-    public ResponseEntity updateReview (@Valid @RequestBody PatchUpdateReviewDtoReq patchUpdateReviewDtoReq) {
-        User user = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+    public ResponseEntity updateReview (@Valid @RequestBody PatchUpdateReviewDtoReq patchUpdateReviewDtoReq, @AuthenticationPrincipal User user) {
         return ResponseEntity.ok().body(reviewService.updateReview(user,patchUpdateReviewDtoReq));
     }
 
@@ -83,8 +81,7 @@ public class ReviewController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @PatchMapping("/delete/{reviewId}")
-    public ResponseEntity deleteReview(@Valid @Parameter(description = "삭제할 Review의 id") @PathVariable Long reviewId){
-        User user = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+    public ResponseEntity deleteReview(@Valid @Parameter(description = "삭제할 Review의 id") @PathVariable Long reviewId, @AuthenticationPrincipal User user){
         return ResponseEntity.ok().body(reviewService.deleteReview(user, reviewId));
     }
 
