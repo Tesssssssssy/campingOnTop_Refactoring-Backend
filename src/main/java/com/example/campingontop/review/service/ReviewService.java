@@ -36,51 +36,68 @@ public class ReviewService {
     private final HouseRepository houseRepository;
 
     @Transactional(readOnly = false)
-    public PostCreateReviewDtoRes createReview (User user, PostCreateReviewDtoReq postCreateReviewDtoReq){
-        List<Review> searchReview = reviewRepository.findReviewByOrderedHouseId(postCreateReviewDtoReq.getOrderedHouseId());
+    public PostCreateReviewDtoRes createReview(User user, PostCreateReviewDtoReq postCreateReviewDtoReq) {
+        try {
+            // 결제 내역 ID로 유효한 리뷰와 삭제된 리뷰 모두 조회
+            Optional<Review> existingActiveReview = reviewRepository.findByOrderedHouseIdAndStatus(
+                    postCreateReviewDtoReq.getOrderedHouseId(), true);
+            Optional<Review> existingDeletedReview = reviewRepository.findByOrderedHouseIdAndStatus(
+                    postCreateReviewDtoReq.getOrderedHouseId(), false);
 
-        OrderedHouse orderedHouse = orderedHouseRespository.findById(postCreateReviewDtoReq.getOrderedHouseId())
-                .orElseThrow(() -> new OrderedHouseException(ErrorCode.ORDEREDHOUSE_NOT_EXIST));
+            // 유효한 리뷰가 이미 존재하는 경우 예외 처리
+            if (existingActiveReview.isPresent()) {
+                throw new ReviewException(ErrorCode.DUPLICATE_REVIEW);
+            }
 
-        Optional<House> searchHouse = houseRepository.findActiveHouse(orderedHouse.getCart().getHouse().getId());
+            // 삭제된 리뷰가 이미 존재하는 경우 예외 처리
+            if (existingDeletedReview.isPresent()) {
+                throw new ReviewException(ErrorCode.REVIEW_ALREADY_DELETED);
+            }
 
-        if(searchHouse.isEmpty()){
-            throw new ReviewException(ErrorCode.HOUSE_NOT_EXIST);
+            OrderedHouse orderedHouse = orderedHouseRespository.findById(postCreateReviewDtoReq.getOrderedHouseId())
+                    .orElseThrow(() -> new OrderedHouseException(ErrorCode.ORDEREDHOUSE_NOT_EXIST));
+
+            Optional<House> searchHouse = houseRepository.findActiveHouse(orderedHouse.getCart().getHouse().getId());
+            if (searchHouse.isEmpty()) {
+                throw new ReviewException(ErrorCode.HOUSE_NOT_EXIST);
+            }
+
+            Review review = Review.builder()
+                    .user(user)
+                    .content(postCreateReviewDtoReq.getContent())
+                    .stars(postCreateReviewDtoReq.getStars())
+                    .createdAt(Timestamp.from(Instant.now()))
+                    .updatedAt(Timestamp.from(Instant.now()))
+                    .status(true)
+                    .orderedHouse(orderedHouse)
+                    .build();
+
+            review = reviewRepository.save(review);
+
+            PostCreateReviewDtoRes postCreateReviewDtoRes = PostCreateReviewDtoRes.builder()
+                    .reviewId(review.getId())
+                    .houseName(review.getOrderedHouse().getCart().getHouse().getName())
+                    .ordersId(review.getOrderedHouse().getOrders().getId())
+                    .content(review.getContent())
+                    .stars(review.getStars())
+                    .createdAt(review.getCreatedAt())
+                    .updatedAt(review.getUpdatedAt())
+                    .build();
+
+            House house = searchHouse.get();
+            house.increseReviewCount();
+            houseRepository.save(house);
+
+            return postCreateReviewDtoRes;
+        } catch (ReviewException e) {
+            log.error("ReviewException 발생: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("예상치 못한 오류 발생: {}", e.getMessage(), e);
+            throw new ReviewException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
-
-        if (!searchReview.isEmpty()){
-            throw new ReviewException(ErrorCode.DUPLICATE_REVIEW);
-        }
-
-        Review review = Review.builder()
-                .user(user)
-                .content(postCreateReviewDtoReq.getContent())
-                .stars(postCreateReviewDtoReq.getStars())
-                .createdAt(Timestamp.from(Instant.now()))
-                .updatedAt(Timestamp.from(Instant.now()))
-                .status(true)
-                .orderedHouse(orderedHouse)
-                .build();
-
-        review = reviewRepository.save(review);
-
-        PostCreateReviewDtoRes postCreateReviewDtoRes = PostCreateReviewDtoRes.builder()
-                .reviewId(review.getId())
-                .houseName(review.getOrderedHouse().getCart().getHouse().getName())
-                .ordersId(review.getOrderedHouse().getOrders().getId())
-                .content(review.getContent())
-                .stars(review.getStars())
-                .createdAt(review.getCreatedAt())
-                .updatedAt(review.getUpdatedAt())
-                .build();
-
-        House house = searchHouse.get();
-        house.increseReviewCount();
-        houseRepository.save(house);
-
-        return postCreateReviewDtoRes;
-
     }
+
 
     @Transactional(readOnly = true)
     public GetFindReviewByUserIdDtoResResult findReviewByUserId(User user){

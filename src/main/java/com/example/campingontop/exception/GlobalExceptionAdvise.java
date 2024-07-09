@@ -7,10 +7,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+@ControllerAdvice
 public class GlobalExceptionAdvise extends ResponseEntityExceptionHandler {
     private final Logger log = LoggerFactory.getLogger(GlobalExceptionAdvise.class);
 
@@ -45,7 +47,7 @@ public class GlobalExceptionAdvise extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(ReviewException.class)
-    public ResponseEntity handleOrdersException(ReviewException e) {
+    public ResponseEntity handleReviewException(ReviewException e) {
         log.error("ReviewException : [{}] - {}", e.getErrorCode().getStatus(), e.getMessage());
         return makeResponseEntity(e.getErrorCode());
     }
