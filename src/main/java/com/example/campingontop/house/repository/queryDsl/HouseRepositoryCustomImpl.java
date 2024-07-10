@@ -191,7 +191,20 @@ public class HouseRepositoryCustomImpl extends QuerydslRepositorySupport impleme
         return new PageImpl<>(houses, pageable, pageable.getPageSize());
     }
 
-    /*
+    @Override
+    public Page<House> findByReviewCntDesc(Pageable pageable) {
+        QHouse qHouse = new QHouse("house");
+
+        List<House> houses =from(qHouse)
+                .leftJoin(qHouse.houseImageList).fetchJoin()
+                .leftJoin(qHouse.user).fetchJoin()
+                .orderBy(qHouse.reviewCnt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch().stream().collect(Collectors.toList());
+        return new PageImpl<>(houses, pageable, pageable.getPageSize());
+    }
+/*
     @Override
     public List<House> findHousesWithinDistance(Double baseLat, Double baseLon) {
         QHouse house = QHouse.house;

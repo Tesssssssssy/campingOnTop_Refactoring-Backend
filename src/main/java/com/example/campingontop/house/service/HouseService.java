@@ -50,6 +50,27 @@ public class HouseService {
         return houseList;
     }
 
+    public List<GetFindHouseDtoRes> findByReviewCntDesc(Integer page, Integer size){
+        Pageable pageable = PageRequest.of(page-1, size);
+        Page<House> result = houseRepository.findByReviewCntDesc(pageable);
+
+        List<GetFindHouseDtoRes> houseList = new ArrayList<>();
+
+        for (House house : result) {
+            List<HouseImage> houseImageList = house.getHouseImageList();
+            List<String> filenames = new ArrayList<>();
+
+            for (HouseImage productImage : houseImageList) {
+                String filename = productImage.getFilename();
+                filenames.add(filename);
+            }
+
+            GetFindHouseDtoRes res = GetFindHouseDtoRes.toDto(house, filenames);
+            houseList.add(res);
+        }
+        return houseList;
+    }
+
     public List<GetFindHouseDtoRes> findByPriceDesc(Integer page, Integer size){
         Pageable pageable = PageRequest.of(page-1, size);
         Page<House> result = houseRepository.findByPriceDesc(pageable);

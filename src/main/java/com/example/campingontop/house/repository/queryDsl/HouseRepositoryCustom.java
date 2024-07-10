@@ -27,6 +27,8 @@ public interface HouseRepositoryCustom {
 
     Page<House> findByAddress(Pageable pageable, String address);
 
+    Page<House> findByReviewCntDesc(Pageable pageable);
+
 
 
 }
