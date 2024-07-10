@@ -5,6 +5,7 @@ import com.example.campingontop.enums.Gender;
 import com.example.campingontop.house.model.House;
 import com.example.campingontop.likes.model.Likes;
 import com.example.campingontop.orders.model.Orders;
+import com.example.campingontop.review.model.Review;
 import com.example.campingontop.user.model.request.PostCreateUserDtoReq;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -73,6 +74,9 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Cart> cartList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private  List<Review> reviewList = new ArrayList<>();
 
 
 
