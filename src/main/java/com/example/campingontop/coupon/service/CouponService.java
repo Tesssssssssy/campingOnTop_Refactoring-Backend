@@ -87,18 +87,23 @@ public class CouponService {
     // 큐를 처리하는 메서드
     public void processQueue(Event event) {
         // 쿠폰이 남아 있는지 확인한 후 발행 시도
-        if (getRemainingEventCount(event) > 0) {
-            log.info("이벤트 처리 중: {}", event);
-            publish(event);
-        } else {
+        if (getRemainingEventCount(event) <= 0) {
             log.info("===== 선착순 이벤트가 종료되었습니다: {} =====", event);
+            return;
         }
+
+        log.info("이벤트 처리 중: {}", event);
+        publish(event);
     }
 
     // 큐에 있는 사용자들에게 쿠폰 발행
     public void publish(Event event) {
         List<User> users = getUsersFromQueue(event);
         for (User user : users) {
+            if (getRemainingEventCount(event) <= 0) {
+                log.info("쿠폰이 모두 소진되었습니다.");
+                break;
+            }
             issueCoupon(event, user);
             decrementEventCount(event);
             redisTemplate.opsForZSet().remove(event.toString(), user.getEmail());
