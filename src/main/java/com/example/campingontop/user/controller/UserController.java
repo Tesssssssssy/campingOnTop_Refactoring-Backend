@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +36,12 @@ import java.util.Map;
 public class UserController {
     private final UserService userService;
     private final EmailVerifyService emailVerifyService;
+
+    @Value("${my.local-domain}")
+    private String localDomain;
+
+    @Value("${my.actual-domain}")
+    private String actualDomain;
 
 
     @Operation(summary = "User 일반 유저 회원가입",
@@ -92,11 +99,13 @@ public class UserController {
     public RedirectView confirm(@Valid @ModelAttribute PostEmailConfirmDtoReq req) {
         if (emailVerifyService.verify(req)) {
             userService.updateMemberStatus(req.getEmail());
-//            return new RedirectView("http://www.campingontop.kro.kr/");
-            return new RedirectView("http://localhost:8081/");
+            return new RedirectView(actualDomain);
+//            return new RedirectView(localDomain);
         } else {
-//            return new RedirectView("http://www.campingontop.kro.kr/email/verify");
-            return new RedirectView("http://localhost:8081/email/verify");
+            String newActualDomain = actualDomain + "email/verify";
+//            String newLocalDomain = localDomain + "email/verify";
+            return new RedirectView(newActualDomain);
+//            return new RedirectView(newLocalDomain);
         }
     }
 
