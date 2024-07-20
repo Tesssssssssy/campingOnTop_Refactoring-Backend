@@ -33,6 +33,10 @@ public class CouponController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 해당 이벤트의 쿠폰을 받았습니다.");
         }
 
+        if (couponService.getRemainingEventCount(event) <= 0) {
+            return ResponseEntity.status(HttpStatus.GONE).body("쿠폰이 모두 소진되었습니다.");
+        }
+
         // 쿠폰 발급 큐에 사용자 추가 시도
         boolean addedToQueue = couponService.addQueue(event, user);
         if (!addedToQueue) {

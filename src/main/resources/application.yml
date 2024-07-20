@@ -4,6 +4,10 @@ jwt:
     expired-time-ms: ${JWT_TOKEN_EXPIRED_TIME}
     refresh-expired-time: ${JWT_REFRESH_EXPIRED_TIME}
 
+my:
+  local-domain: ${LOCAL_DOMAIN}
+  actual-domain: ${ACTUAL_DOMAIN}
+
 imp:
   apiKey: ${IMP_KEY}
   secretKey: ${IMP_SECRET}
