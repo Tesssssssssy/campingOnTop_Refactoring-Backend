@@ -1,7 +1,11 @@
 package com.example.campingontop.exception.entityException;
 
 import com.example.campingontop.exception.ErrorCode;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
+@AllArgsConstructor
 public class ReviewException extends RuntimeException {
 
     private ErrorCode errorCode;

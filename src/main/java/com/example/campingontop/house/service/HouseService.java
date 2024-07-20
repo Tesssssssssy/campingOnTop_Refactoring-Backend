@@ -50,6 +50,27 @@ public class HouseService {
         return houseList;
     }
 
+    public List<GetFindHouseDtoRes> findByReviewCntDesc(Integer page, Integer size){
+        Pageable pageable = PageRequest.of(page-1, size);
+        Page<House> result = houseRepository.findByReviewCntDesc(pageable);
+
+        List<GetFindHouseDtoRes> houseList = new ArrayList<>();
+
+        for (House house : result) {
+            List<HouseImage> houseImageList = house.getHouseImageList();
+            List<String> filenames = new ArrayList<>();
+
+            for (HouseImage productImage : houseImageList) {
+                String filename = productImage.getFilename();
+                filenames.add(filename);
+            }
+
+            GetFindHouseDtoRes res = GetFindHouseDtoRes.toDto(house, filenames);
+            houseList.add(res);
+        }
+        return houseList;
+    }
+
     public List<GetFindHouseDtoRes> findByPriceDesc(Integer page, Integer size){
         Pageable pageable = PageRequest.of(page-1, size);
         Page<House> result = houseRepository.findByPriceDesc(pageable);
@@ -112,9 +133,8 @@ public class HouseService {
     }
 
 
-    public List<GetFindHouseDtoRes> getNearestHouseList(GetHouseListPagingByLocReq req){
-        Pageable pageable = PageRequest.of(req.getPage()-1, req.getSize());
-        Page<House> result = houseRepository.getNearestHouseList(pageable, req.getLatitude(), req.getLongitude());
+    public List<GetFindHouseDtoRes> getNearestHouseList(Double latitude, Double longitude){
+        List<House> result = houseRepository.getNearestHouseList(latitude, longitude);
 
         List<GetFindHouseDtoRes> houseList = new ArrayList<>();
 
@@ -176,6 +196,7 @@ public class HouseService {
                 .user(user)
                 .status(true)
                 .likeCnt(0)
+                .reviewCnt(0)
                 .build();
 
         house = houseRepository.save(house);

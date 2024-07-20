@@ -1,6 +1,7 @@
 package com.example.campingontop.orders.model;
 
 import com.example.campingontop.cart.model.Cart;
+import com.example.campingontop.review.model.Review;
 import lombok.*;
 
 import javax.persistence.*;
@@ -23,6 +24,9 @@ public class OrderedHouse {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Cart_id")
     private Cart cart;
+
+    @OneToOne(mappedBy = "orderedHouse", fetch = FetchType.LAZY)
+    private Review review;
 
     public static OrderedHouse toEntity(Orders orders, Cart cart) {
         return OrderedHouse.builder()

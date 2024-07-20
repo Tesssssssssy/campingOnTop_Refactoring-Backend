@@ -121,10 +121,10 @@ public class HouseRepositoryCustomImpl extends QuerydslRepositorySupport impleme
 //    LIMIT 3
 
     @Override
-    public Page<House> getNearestHouseList(Pageable pageable, Double latitude, Double longitude) {
+    public List<House> getNearestHouseList(Double latitude, Double longitude) {
         QHouse qHouse = new QHouse("house");
 
-        // latitude 를 radians 로 계산
+        // latitude를 radians로 계산
         NumberExpression<Double> radiansLatitude =
                 Expressions.numberTemplate(Double.class, "radians({0})", latitude);
 
@@ -140,30 +140,29 @@ public class HouseRepositoryCustomImpl extends QuerydslRepositorySupport impleme
         NumberExpression<Double> sinSubWayLatitude =
                 Expressions.numberTemplate(Double.class, "sin(radians({0}))", qHouse.latitude);
 
-        // 사이 거리 계산
+        // 경도 차이에 대한 코사인 계산
         NumberExpression<Double> cosLongitude =
                 Expressions.numberTemplate(Double.class, "cos(radians({0}) - radians({1}))", qHouse.longitude, longitude);
 
+        // 각 요소의 코사인과 사인 값을 결합하여 acos 계산
         NumberExpression<Double> acosExpression =
                 Expressions.numberTemplate(Double.class, "acos({0})", cosLatitude.multiply(cosSubwayLatitude).multiply(cosLongitude).add(sinLatitude.multiply(sinSubWayLatitude)));
 
-        // 최종 계산
+        // 최종 거리 계산 (단위: km)
         NumberExpression<Double> distanceExpression =
                 Expressions.numberTemplate(Double.class, "6371 * {0}", acosExpression);
 
+        // 1km 이내의 숙소만 검색
         List<House> findByNearestHouseList = from(qHouse)
                 .leftJoin(qHouse.houseImageList).fetchJoin()
                 .leftJoin(qHouse.user).fetchJoin()
+                .where(distanceExpression.loe(1.0)) // 거리가 1km 이하인 숙소만 필터링
                 .orderBy(distanceExpression.asc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
                 .fetch().stream().collect(Collectors.toList());
 
-
-        return new PageImpl<>(findByNearestHouseList.stream()
-                .distinct()
-                .collect(Collectors.toList()), pageable, pageable.getPageSize());
+        return findByNearestHouseList;
     }
+
     @Override
     public Page<House> findByName(Pageable pageable, String name){
         QHouse qHouse = new QHouse("house");
@@ -192,7 +191,20 @@ public class HouseRepositoryCustomImpl extends QuerydslRepositorySupport impleme
         return new PageImpl<>(houses, pageable, pageable.getPageSize());
     }
 
-    /*
+    @Override
+    public Page<House> findByReviewCntDesc(Pageable pageable) {
+        QHouse qHouse = new QHouse("house");
+
+        List<House> houses =from(qHouse)
+                .leftJoin(qHouse.houseImageList).fetchJoin()
+                .leftJoin(qHouse.user).fetchJoin()
+                .orderBy(qHouse.reviewCnt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch().stream().collect(Collectors.toList());
+        return new PageImpl<>(houses, pageable, pageable.getPageSize());
+    }
+/*
     @Override
     public List<House> findHousesWithinDistance(Double baseLat, Double baseLon) {
         QHouse house = QHouse.house;

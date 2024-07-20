@@ -30,6 +30,7 @@ public class GetFindHouseDtoRes {
     private Boolean hasHeater;
 
     private Integer likeCnt;
+    private Integer reviewCnt;
     private List<String> filenames;
 
     public static GetFindHouseDtoRes toDto(House house, List<String> filenames) {
@@ -47,6 +48,7 @@ public class GetFindHouseDtoRes {
                 .hasBed(house.getHasBed())
                 .hasHeater(house.getHasHeater())
                 .likeCnt(house.getLikeCnt())
+                .reviewCnt(house.getReviewCnt())
                 .filenames(filenames)
                 .build();
     }
@@ -66,6 +68,7 @@ public class GetFindHouseDtoRes {
                 .hasBed(house.getHasBed())
                 .hasHeater(house.getHasHeater())
                 .likeCnt(house.getLikeCnt())
+                .reviewCnt(house.getReviewCnt())
                 .build();
     }
 }

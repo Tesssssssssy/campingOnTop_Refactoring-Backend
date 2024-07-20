@@ -1,5 +1,6 @@
 package com.example.campingontop.user.controller;
 
+import com.example.campingontop.exception.entityException.UserException;
 import com.example.campingontop.user.model.request.PostCreateUserDtoReq;
 import com.example.campingontop.user.model.request.PostEmailConfirmDtoReq;
 import com.example.campingontop.user.model.request.PostLoginUserDtoReq;
@@ -15,13 +16,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 import javax.mail.MessagingException;
 import javax.validation.Valid;
-import java.util.List;
+import java.util.Map;
 
 @Tag(name="User", description = "User CRUD")
 @Api(tags = "User")
@@ -33,6 +36,12 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final EmailVerifyService emailVerifyService;
+
+    @Value("${my.local-domain}")
+    private String localDomain;
+
+    @Value("${my.actual-domain}")
+    private String actualDomain;
 
 
     @Operation(summary = "User 일반 유저 회원가입",
@@ -67,6 +76,19 @@ public class UserController {
         return ResponseEntity.ok().body(userService.login(req));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<PostLoginUserDtoRes> refreshToken(@RequestBody Map<String, String> refreshTokenRequest) {
+        String refreshToken = refreshTokenRequest.get("refreshToken");
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            return ResponseEntity.ok(userService.refreshToken(refreshToken));
+        } catch (UserException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
 
     @Operation(summary = "User 이메일 인증",
             description = "회원가입 과정에서 이메일 검증을 하는 API입니다.")
@@ -77,9 +99,13 @@ public class UserController {
     public RedirectView confirm(@Valid @ModelAttribute PostEmailConfirmDtoReq req) {
         if (emailVerifyService.verify(req)) {
             userService.updateMemberStatus(req.getEmail());
-            return new RedirectView("http://www.campingontop.kro.kr/");
+            return new RedirectView(actualDomain);
+//            return new RedirectView(localDomain);
         } else {
-            return new RedirectView("http://www.campingontop.kro.kr/email/verify");
+            String newActualDomain = actualDomain + "email/verify";
+//            String newLocalDomain = localDomain + "email/verify";
+            return new RedirectView(newActualDomain);
+//            return new RedirectView(newLocalDomain);
         }
     }
 

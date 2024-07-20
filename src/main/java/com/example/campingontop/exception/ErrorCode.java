@@ -44,11 +44,16 @@ public enum ErrorCode {
 
     REVIEW_NOT_EXIST(HttpStatus.NOT_FOUND,"해당 리뷰가 존재하지 않습니다."),
 
+    DUPLICATE_REVIEW(HttpStatus.CONFLICT,"이미 해당 숙소에 작성한 리뷰입니다."),
+    REVIEW_ALREADY_DELETED(HttpStatus.BAD_REQUEST,"해당 숙소에 리뷰 작성 후 삭제했기 때문에 추가 리뷰 작성이 불가능합니다."),
+
 
     // Orders 관련 에러
     ORDERS_NOT_EXIST(HttpStatus.NOT_FOUND, "해당 주문 내역이 존재하지 않습니다."),
     NOT_MATCH_AMOUNT(HttpStatus.BAD_REQUEST, "가격이 일치하지 않습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러"),
+
+    INVALID_JSON_FORMAT(HttpStatus.INTERNAL_SERVER_ERROR, "올바르지 않은 JSON 형식"),
     ;
 
     public HttpStatus getStatus() {

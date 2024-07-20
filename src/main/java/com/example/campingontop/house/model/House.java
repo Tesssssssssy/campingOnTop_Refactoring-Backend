@@ -2,7 +2,6 @@ package com.example.campingontop.house.model;
 
 import com.example.campingontop.houseImage.model.HouseImage;
 import com.example.campingontop.likes.model.Likes;
-import com.example.campingontop.orders.model.OrderedHouse;
 import com.example.campingontop.user.model.User;
 import lombok.*;
 
@@ -62,6 +61,8 @@ public class House {
 
     private Integer likeCnt;
 
+    private Integer reviewCnt;
+
     @Column(updatable = false, nullable = false)
     private Date createdAt;
 
@@ -74,9 +75,8 @@ public class House {
     @OneToMany(mappedBy = "house", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<HouseImage> houseImageList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "house", fetch = FetchType.LAZY)
+        @OneToMany(mappedBy = "house", fetch = FetchType.LAZY)
     private List<Likes> likesList = new ArrayList<>();
-
 
     @PrePersist
     void createdAt() {
@@ -97,4 +97,8 @@ public class House {
     public void decreaseLikeCount() {
         this.likeCnt = this.likeCnt - 1;
     }
+
+    public void increseReviewCount() {this.reviewCnt = this.reviewCnt + 1; }
+
+    public void decreaseReviewCount() {this.reviewCnt = this.reviewCnt - 1; }
 }

@@ -60,6 +60,19 @@ public class HouseController {
         return ResponseEntity.ok().body(houseService.findByLikeCntDesc(page, size));
     }
 
+    @Operation(summary = "House 리뷰 내림차순 조회",
+            description = "숙소 리뷰 수 내림차순으로 숙소를 조회하는 API입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "500",description = "서버 내부 오류")})
+    @GetMapping("/find/reviewCntDesc")
+    public ResponseEntity findHouseByReviewCntDesc(
+            @Valid @RequestParam Integer page,
+            @Valid @RequestParam Integer size
+    ) {
+        return ResponseEntity.ok().body(houseService.findByReviewCntDesc(page, size));
+    }
+
 
     @Operation(summary = "House 가격 내림차순 조회",
             description = "가격 내림차순으로 숙소를 조회하는 API입니다.")
@@ -126,9 +139,10 @@ public class HouseController {
             @ApiResponse(responseCode = "500",description = "서버 내부 오류")})
     @GetMapping("/find/location")
     public ResponseEntity getNearestHouseList(
-            @Valid @RequestBody GetHouseListPagingByLocReq req
+            @Valid @RequestParam Double latitude,
+            @Valid @RequestParam Double longitude
     ) {
-        return ResponseEntity.ok().body(houseService.getNearestHouseList(req));
+        return ResponseEntity.ok().body(houseService.getNearestHouseList(latitude,longitude));
     }
 
 

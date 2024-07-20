@@ -1,13 +1,17 @@
 package com.example.campingontop.user.model.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class VerifyEmailCert {
-    private final Long id;
-    private final String email;
-    private final String uuid;
+    private Long id;
+    private String email;
+    private String uuid;
 }
 

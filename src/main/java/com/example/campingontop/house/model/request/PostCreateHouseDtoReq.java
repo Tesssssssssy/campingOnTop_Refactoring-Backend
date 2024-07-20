@@ -3,6 +3,8 @@ package com.example.campingontop.house.model.request;
 import lombok.*;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class PostCreateHouseDtoReq {
     private String name;
