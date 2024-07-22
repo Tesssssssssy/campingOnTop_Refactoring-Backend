@@ -1,6 +1,6 @@
 package com.example.campingontop.config.filter;
 
-import com.example.campingontop.user.model.User;
+import com.example.campingontop.domain.mysql.user.model.User;
 import com.example.campingontop.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
