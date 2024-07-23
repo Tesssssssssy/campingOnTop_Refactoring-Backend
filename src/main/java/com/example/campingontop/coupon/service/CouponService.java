@@ -6,6 +6,8 @@ import com.example.campingontop.coupon.model.EventCount;
 import com.example.campingontop.coupon.model.dto.GetCouponRes;
 import com.example.campingontop.coupon.repository.CouponRepository;
 import com.example.campingontop.coupon.scheduler.EventScheduler;
+import com.example.campingontop.exception.ErrorCode;
+import com.example.campingontop.exception.entityException.CouponException;
 import com.example.campingontop.user.model.User;
 import com.example.campingontop.user.repository.queryDsl.UserRepository;
 import com.example.campingontop.userCoupon.model.UserCoupon;
@@ -17,6 +19,7 @@ import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -124,14 +127,14 @@ public class CouponService {
     public void issueCoupon(Event event, User user) {
         Coupon coupon = couponRepository.save(Coupon.builder()
                 .event(event)
-                .price(10000)
+                .price(event.getPrice())
                 .build());
         userCouponRepository.save(UserCoupon.builder()
                 .user(user)
                 .coupon(coupon)
                 .isUsed(false)
                 .build());
-        log.info("'{}'에게 {} 쿠폰이 발급되었습니다", user.getName(), event.name());
+        log.info("'{}'에게 {} 쿠폰이 발급되었습니다", user.getName(), event.getName());
     }
 
     // 큐에 있는 사용자 목록 가져오기
@@ -157,5 +160,29 @@ public class CouponService {
                         .issuedAt(userCoupon.getCoupon().getCreatedAt().toString())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    // 쿠폰 만료 시간 만료시 파기
+    @Transactional
+    public void expireOldCoupon() {
+        List<Coupon> result = couponRepository.findExpiredCoupons();
+
+//        if(result.isEmpty()) {
+//            throw new CouponException(ErrorCode.COUPON_NOT_EXIST);
+//        }
+        if(result.isEmpty()) {
+            log.info("만료된 쿠폰이 없습니다.");
+            return;
+        }
+
+        for(Coupon coupon : result) {
+            coupon.setStatus(false);
+            couponRepository.save(coupon);
+        }
+
+        for(Coupon coupon : result) {
+            coupon.setStatus(false);
+            couponRepository.save(coupon);
+        }
     }
 }

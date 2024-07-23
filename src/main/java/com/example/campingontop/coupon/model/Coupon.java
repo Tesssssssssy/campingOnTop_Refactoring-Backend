@@ -1,12 +1,14 @@
 package com.example.campingontop.coupon.model;
 
 import com.example.campingontop.coupon.constant.Event;
-import com.example.campingontop.user.model.User;
 import lombok.*;
+import org.hibernate.annotations.Comment;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -29,8 +31,15 @@ public class Coupon {
     @Column(nullable = false, updatable = false)
     private Date createdAt;
 
+    @Column(nullable = false)
+    private Date expiryTime;
+
+    @Comment("0: 비활성화 | 1: 활성화")
+    private Boolean status;
+
     @PrePersist
-    void createdAt() {
+    void onPrePersist() {
         this.createdAt = new Date();
+        this.expiryTime = Timestamp.from(Instant.now().plus(2, ChronoUnit.WEEKS));
     }
 }

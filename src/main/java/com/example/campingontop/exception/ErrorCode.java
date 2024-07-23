@@ -6,6 +6,9 @@ public enum ErrorCode {
     // 공통 에러 코드
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "입력값이 잘못되었습니다.."),
 
+    // Coupon 관련 에러 코드
+    COUPON_NOT_EXIST(HttpStatus.CONFLICT, "존재하지 않는 쿠폰입니다."),
+
     // User 관련 에러 코드
     DUPLICATED_USER(HttpStatus.CONFLICT, "이미 존재하는 사용자입니다."),
     DUPLICATED_EMAIL(HttpStatus.CONFLICT, "이미 사용중인 이메일입니다."),

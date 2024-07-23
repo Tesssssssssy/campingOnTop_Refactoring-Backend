@@ -19,10 +19,19 @@ public class EventScheduler {
     // 애플리케이션 시작 시 쿠폰 수량 초기화
     @PostConstruct
     private void init() {
-        Event event = Event.FREE_CAMPING;
-        int initialCouponCount = 3; // 초기 쿠폰 수량 설정 (예: 3개)
-        couponService.setEventCount(event, initialCouponCount);
-        log.info("이벤트 {}의 초기 쿠폰 수량이 {}으로 설정되었습니다.", event, initialCouponCount);
+        initializeEventCouponCounts();
+    }
+
+    private void initializeEventCouponCounts() {
+        // 각 이벤트별 초기 쿠폰 수량 설정
+        setInitialCouponCount(Event.FREE_CAMPING, 3);
+        setInitialCouponCount(Event.DISCOUNT, 10);
+        setInitialCouponCount(Event.GIFT_CARD, 5);
+    }
+
+    private void setInitialCouponCount(Event event, int count) {
+        couponService.setEventCount(event, count);
+        log.info("이벤트 {}의 초기 쿠폰 수량이 {}으로 설정되었습니다.", event.getName(), count);
     }
 
     // 요청이 들어올 때 호출되는 메서드
@@ -33,6 +42,15 @@ public class EventScheduler {
             couponService.publish(event);
         } else {
             log.info("===== 선착순 이벤트가 종료되었습니다: {} =====", event);
+        }
+    }
+    @Scheduled(cron = "0 0 1 * * ?")
+    public void expireOldCoupon() {
+        try {
+            couponService.expireOldCoupon();
+            log.info("만료된 쿠폰을 파기했습니다.");
+        } catch (Exception e) {
+            log.error("만료된 쿠폰 파기 중 오류 발생", e);
         }
     }
 }
