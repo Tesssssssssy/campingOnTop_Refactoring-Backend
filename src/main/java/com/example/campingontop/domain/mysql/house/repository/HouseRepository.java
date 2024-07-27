@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface HouseRepository extends JpaRepository<House, Long>, HouseRepositoryCustom {
     public Optional<House> findByName(String name);
+    Optional<House> findByUserId(Long userId);
 }
