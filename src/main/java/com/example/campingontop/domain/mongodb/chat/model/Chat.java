@@ -1,44 +1,38 @@
 package com.example.campingontop.domain.mongodb.chat.model;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Id;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @Document(collection = "chats")
-@Getter
-@Setter
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Chat {
     @Id
     private String id;
-
-    private String senderId;
+    private String chatRoomId;
+    private Long senderId;
     private String senderNickname;
-    private String recipientId;
-    private String recipientNickname;
-    private String roomId;
     private String message;
 
     @CreatedDate
     private LocalDateTime date;
 
-    public ChatDto toDto() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
+    public static ChatDto convertToDto(Chat chat) {
         return ChatDto.builder()
-                .senderId(getSenderId())
-                .senderNickname(getSenderNickname())
-                .recipientId(getRecipientId())
-                .recipientNickname(getRecipientNickname())
-                .message(getMessage())
-                .date(getDate().format(formatter))
+                .id(chat.getId())
+                .chatRoomId(chat.getChatRoomId())
+                .senderId(chat.getSenderId())
+                .senderNickname(chat.getSenderNickname()) // Ensure senderNickname is included
+                .message(chat.getMessage())
+                .date(chat.getDate().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime()) // Convert LocalDateTime to OffsetDateTime
                 .build();
     }
 }

@@ -2,7 +2,8 @@ package com.example.campingontop.domain.mongodb.chat.model;
 
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+
 
 @Getter
 @Setter
@@ -10,10 +11,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class ChatDto {
-    private String senderId;
+    private String id;
+    private String chatRoomId;
+    private Long senderId;
     private String senderNickname;
-    private String recipientId;
-    private String recipientNickname;
     private String message;
-    private String date;
+    private OffsetDateTime date;
+
+    public static Chat convertToEntity(ChatDto chatDto) {
+        return Chat.builder()
+                .id(chatDto.getId())
+                .chatRoomId(chatDto.getChatRoomId())
+                .senderId(chatDto.getSenderId())
+                .senderNickname(chatDto.getSenderNickname())
+                .message(chatDto.getMessage())
+                .date(chatDto.getDate().toLocalDateTime())
+                .build();
+    }
 }
