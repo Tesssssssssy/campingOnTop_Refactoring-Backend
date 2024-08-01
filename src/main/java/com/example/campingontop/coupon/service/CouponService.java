@@ -128,10 +128,15 @@ public class CouponService {
         Coupon coupon = couponRepository.save(Coupon.builder()
                 .event(event)
                 .price(event.getPrice())
+                .status(true)
                 .build());
+
+        coupon = couponRepository.save(coupon);
+
         userCouponRepository.save(UserCoupon.builder()
                 .user(user)
                 .coupon(coupon)
+                .expiryTime(coupon.getExpiryTime())
                 .isUsed(false)
                 .build());
         log.info("'{}'에게 {} 쿠폰이 발급되었습니다", user.getName(), event.getName());
@@ -165,24 +170,23 @@ public class CouponService {
     // 쿠폰 만료 시간 만료시 파기
     @Transactional
     public void expireOldCoupon() {
-        List<Coupon> result = couponRepository.findExpiredCoupons();
-
-//        if(result.isEmpty()) {
+        List<Coupon> expiredCoupons = couponRepository.findExpiredCoupons();
+        //        if(result.isEmpty()) {
 //            throw new CouponException(ErrorCode.COUPON_NOT_EXIST);
 //        }
-        if(result.isEmpty()) {
-            log.info("만료된 쿠폰이 없습니다.");
-            return;
+        if (expiredCoupons.isEmpty()) {
+            throw new CouponException(ErrorCode.COUPON_NOT_EXIST);
         }
 
-        for(Coupon coupon : result) {
+        for (Coupon coupon : expiredCoupons) {
             coupon.setStatus(false);
             couponRepository.save(coupon);
-        }
 
-        for(Coupon coupon : result) {
-            coupon.setStatus(false);
-            couponRepository.save(coupon);
+            List<UserCoupon> userCoupons = userCouponRepository.findByCoupon(coupon);
+            for (UserCoupon userCoupon : userCoupons) {
+                userCoupon.setUsed(true);
+                userCouponRepository.save(userCoupon);
+            }
         }
     }
 }

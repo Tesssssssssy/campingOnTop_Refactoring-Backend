@@ -5,9 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.Comment;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
 import java.util.Date;
 
 @Entity
@@ -40,6 +38,9 @@ public class Coupon {
     @PrePersist
     void onPrePersist() {
         this.createdAt = new Date();
-        this.expiryTime = Timestamp.from(Instant.now().plus(2, ChronoUnit.WEEKS));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.WEEK_OF_YEAR, 2); // 현재 시간에 2주 추가
+        this.expiryTime = calendar.getTime();
     }
 }

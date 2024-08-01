@@ -107,6 +107,7 @@ public class ReviewService {
         for(Review review : list){
             GetFindReviewByUserIdDtoRes getFindReviewByUserIdDtoRes = GetFindReviewByUserIdDtoRes.builder()
                     .reviewId(review.getId())
+                    .houseId(review.getOrderedHouse().getCart().getHouse().getId())
                     .houseName(review.getOrderedHouse().getCart().getHouse().getName())
                     .ordersNum(review.getOrderedHouse().getOrders().getId())
                     .reviewContent(review.getContent())
