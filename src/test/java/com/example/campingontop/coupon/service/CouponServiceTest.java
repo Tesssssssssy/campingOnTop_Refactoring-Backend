@@ -1,12 +1,13 @@
 package com.example.campingontop.coupon.service;
 
-import com.example.campingontop.coupon.constant.Event;
-import com.example.campingontop.coupon.repository.CouponRepository;
+import com.example.campingontop.domain.mysql.coupon.constant.Event;
+import com.example.campingontop.domain.mysql.coupon.repository.CouponRepository;
+import com.example.campingontop.domain.mysql.coupon.service.CouponService;
 import com.example.campingontop.enums.Gender;
-import com.example.campingontop.user.model.User;
-import com.example.campingontop.user.repository.queryDsl.UserRepository;
-import com.example.campingontop.userCoupon.model.UserCoupon;
-import com.example.campingontop.userCoupon.repository.UserCouponRepository;
+import com.example.campingontop.domain.mysql.user.model.User;
+import com.example.campingontop.domain.mysql.user.repository.queryDsl.UserRepository;
+import com.example.campingontop.domain.mysql.userCoupon.model.UserCoupon;
+import com.example.campingontop.domain.mysql.userCoupon.repository.UserCouponRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +32,6 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 
 @AutoConfigureMockMvc
