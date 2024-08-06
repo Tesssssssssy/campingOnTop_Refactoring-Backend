@@ -8,10 +8,13 @@ import com.example.campingontop.domain.mysql.user.model.User;
 import com.example.campingontop.domain.mysql.user.repository.queryDsl.UserRepository;
 import com.example.campingontop.domain.mysql.userCoupon.model.UserCoupon;
 import com.example.campingontop.domain.mysql.userCoupon.repository.UserCouponRepository;
+import com.example.campingontop.exception.ErrorCode;
+import com.example.campingontop.exception.entityException.CouponException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -118,14 +121,19 @@ public class CouponService {
     public void issueCoupon(Event event, User user) {
         Coupon coupon = couponRepository.save(Coupon.builder()
                 .event(event)
-                .price(10000)
+                .price(event.getPrice())
+                .status(true)
                 .build());
+
+        coupon = couponRepository.save(coupon);
+
         userCouponRepository.save(UserCoupon.builder()
                 .user(user)
                 .coupon(coupon)
+                .expiryTime(coupon.getExpiryTime())
                 .isUsed(false)
                 .build());
-        log.info("'{}'에게 {} 쿠폰이 발급되었습니다", user.getName(), event.name());
+        log.info("'{}'에게 {} 쿠폰이 발급되었습니다", user.getName(), event.getName());
     }
 
     // 큐에 있는 사용자 목록 가져오기
@@ -151,5 +159,28 @@ public class CouponService {
                         .issuedAt(userCoupon.getCoupon().getCreatedAt().toString())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    // 쿠폰 만료 시간 만료시 파기
+    @Transactional
+    public void expireOldCoupon() {
+        List<Coupon> expiredCoupons = couponRepository.findExpiredCoupons();
+        //        if(result.isEmpty()) {
+//            throw new CouponException(ErrorCode.COUPON_NOT_EXIST);
+//        }
+        if (expiredCoupons.isEmpty()) {
+            throw new CouponException(ErrorCode.COUPON_NOT_EXIST);
+        }
+
+        for (Coupon coupon : expiredCoupons) {
+            coupon.setStatus(false);
+            couponRepository.save(coupon);
+
+            List<UserCoupon> userCoupons = userCouponRepository.findByCoupon(coupon);
+            for (UserCoupon userCoupon : userCoupons) {
+                userCoupon.setUsed(true);
+                userCouponRepository.save(userCoupon);
+            }
+        }
     }
 }

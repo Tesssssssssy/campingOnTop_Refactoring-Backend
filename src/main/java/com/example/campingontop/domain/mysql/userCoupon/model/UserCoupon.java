@@ -38,9 +38,9 @@ public class UserCoupon {
     @PrePersist
     void onPrePersist() {
         this.createdAt = new Date();
-        if (this.expiryTime == null) {
-            this.expiryTime = coupon.getExpiryTime();
-        }
+//        if (this.expiryTime == null) {
+//            this.expiryTime = coupon.getExpiryTime();
+//        }
     }
 
 }

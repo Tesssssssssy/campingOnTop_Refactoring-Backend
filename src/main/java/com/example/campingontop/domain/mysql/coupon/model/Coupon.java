@@ -2,8 +2,10 @@ package com.example.campingontop.domain.mysql.coupon.model;
 
 import com.example.campingontop.domain.mysql.coupon.constant.Event;
 import lombok.*;
+import org.hibernate.annotations.Comment;
 
 import javax.persistence.*;
+import java.util.Calendar;
 import java.util.Date;
 
 @Entity
@@ -27,8 +29,18 @@ public class Coupon {
     @Column(nullable = false, updatable = false)
     private Date createdAt;
 
+    @Column(nullable = false)
+    private Date expiryTime;
+
+    @Comment("0: 비활성화 | 1: 활성화")
+    private Boolean status;
+
     @PrePersist
-    void createdAt() {
+    void onPrePersist() {
         this.createdAt = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.WEEK_OF_YEAR, 2); // 현재 시간에 2주 추가
+        this.expiryTime = calendar.getTime();
     }
 }

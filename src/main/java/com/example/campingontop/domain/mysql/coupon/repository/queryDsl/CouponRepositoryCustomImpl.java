@@ -1,7 +1,7 @@
-package com.example.campingontop.coupon.repository.queryDsl;
+package com.example.campingontop.domain.mysql.coupon.repository.queryDsl;
 
-import com.example.campingontop.coupon.model.Coupon;
-import com.example.campingontop.coupon.model.QCoupon;
+import com.example.campingontop.domain.mysql.coupon.model.Coupon;
+import com.example.campingontop.domain.mysql.coupon.model.QCoupon;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 

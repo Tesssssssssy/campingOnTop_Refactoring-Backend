@@ -3,6 +3,7 @@ package com.example.campingontop.domain.mysql.orders.service;
 import com.example.campingontop.domain.mysql.cart.model.Cart;
 import com.example.campingontop.domain.mysql.cart.repository.CartRepository;
 import com.example.campingontop.common.BaseResponse;
+import com.example.campingontop.domain.mysql.coupon.model.Coupon;
 import com.example.campingontop.exception.ErrorCode;
 import com.example.campingontop.exception.entityException.OrdersException;
 import com.example.campingontop.exception.entityException.UserException;
@@ -49,7 +50,7 @@ public class OrdersService {
     private String secretKey;
 
     @Transactional
-    public BaseResponse<List<PostOrderInfoRes>> createOrder(User user, String impUid, Integer finalAmount) throws IamportResponseException, IOException {
+    public BaseResponse<List<PostOrderInfoRes>> createOrder(User user, String impUid, Integer finalAmount, Long couponId) throws IamportResponseException, IOException {
         IamportResponse<Payment> iamportResponse = paymentService.getPaymentInfo(impUid);
         Integer amount = iamportResponse.getResponse().getAmount().intValue();
 
@@ -90,10 +91,19 @@ public class OrdersService {
             }
 
             // 쿠폰 사용 처리
-            List<UserCoupon> userCoupons = userCouponRepository.findByUser(user);
-            for (UserCoupon userCoupon : userCoupons) {
-                userCoupon.setUsed(true);
-                userCouponRepository.save(userCoupon);
+//            List<UserCoupon> userCoupons = userCouponRepository.findByUser(user);
+//            for (UserCoupon userCoupon : userCoupons) {
+//                userCoupon.setUsed(true);
+//                userCouponRepository.save(userCoupon);
+//            }
+            // 쿠폰 사용 처리
+            if (couponId != null) {
+                Optional<UserCoupon> userCoupon = userCouponRepository.findByCouponId(couponId);
+                if (userCoupon != null) {
+                    UserCoupon userCouponResult= userCoupon.get();
+                    userCouponResult.setUsed(true);
+                    userCouponRepository.save(userCouponResult);
+                }
             }
 
             return BaseResponse.successResponse("주문 완료", orderList);
