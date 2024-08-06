@@ -11,6 +11,8 @@ public class GetFindReviewByUserIdDtoRes {
 
     private Long reviewId;
 
+    private Long houseId;
+
     private String houseName;
 
     private Long ordersNum;

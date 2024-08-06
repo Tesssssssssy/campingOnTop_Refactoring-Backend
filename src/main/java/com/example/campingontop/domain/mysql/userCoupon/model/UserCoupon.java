@@ -29,10 +29,18 @@ public class UserCoupon {
     @Column(nullable = false, updatable = false)
     private Date createdAt;
 
+    @Column(nullable = false)
+    private Date expiryTime;
+
+    @Column(nullable = false)
     private boolean isUsed;
 
     @PrePersist
-    void createdAt() {
+    void onPrePersist() {
         this.createdAt = new Date();
+//        if (this.expiryTime == null) {
+//            this.expiryTime = coupon.getExpiryTime();
+//        }
     }
+
 }

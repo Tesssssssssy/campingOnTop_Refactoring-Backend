@@ -1,6 +1,7 @@
 package com.example.campingontop.domain.mysql.orders.controller;
 
 import com.example.campingontop.common.BaseResponse;
+import com.example.campingontop.domain.mysql.coupon.model.Coupon;
 import com.example.campingontop.domain.mysql.coupon.service.CouponService;
 import com.example.campingontop.domain.mysql.orders.service.OrdersService;
 import com.example.campingontop.domain.mysql.orders.service.PaymentService;
@@ -9,6 +10,7 @@ import com.example.campingontop.exception.entityException.OrdersException;
 import com.example.campingontop.domain.mysql.orders.model.dto.response.GetOrdersListRes;
 import com.example.campingontop.domain.mysql.orders.model.dto.response.PostOrderInfoRes;
 import com.example.campingontop.domain.mysql.user.model.User;
+import com.google.gson.Gson;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -47,11 +49,18 @@ public class OrdersController {
                                                              @RequestBody Map<String, String> requestBody) {
         String impUid = requestBody.get("impUid");
         Integer finalAmount = Integer.parseInt(requestBody.get("finalAmount"));
+        Long couponId = null;
+
+        Object couponObj = requestBody.get("couponId");
+        if (couponObj != null) {
+            // 쿠폰 정보가 있는 경우, JSON으로 변환하여 객체 생성
+            couponId = Long.parseLong(requestBody.get("couponId"));
+        }
         log.info("Received impUid for validation: {}, finalAmount: {}", impUid, finalAmount);
         try {
             if(paymentService.paymentValidation(impUid, finalAmount)){
                 log.info("Payment validation successful, creating order...");
-                return ordersService.createOrder(user, impUid, finalAmount);
+                return ordersService.createOrder(user, impUid, finalAmount, couponId);
             } else {
                 log.error("Payment validation failed for impUid: {}", impUid);
                 throw new OrdersException(ErrorCode.NOT_MATCH_AMOUNT);
