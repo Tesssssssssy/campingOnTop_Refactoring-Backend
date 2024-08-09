@@ -23,13 +23,18 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.validation.Valid;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -44,6 +49,7 @@ public class UserService {
     private final EmailVerifyService emailVerifyService;
     // private final KafkaTemplate kafkaTemplate;
     private final RedisTemplate<String, String> redisTemplate;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -155,29 +161,44 @@ public class UserService {
     }
 
 
-    public PostLoginUserDtoRes login(PostLoginUserDtoReq req) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword()));
+    public PostLoginUserDtoRes login(@Valid @RequestBody PostLoginUserDtoReq req) {
+        try {
+            // 사용자 존재 여부 확인
+            UserDetails userDetails = userDetailsService.loadUserByUsername(req.getUsername());
+            if (userDetails == null) {
+                throw new UsernameNotFoundException("가입되지 않은 이메일입니다.");
+            }
 
-        if (authentication.isAuthenticated()) {
-            Long id = ((User) authentication.getPrincipal()).getId();
-            String email = ((User) authentication.getPrincipal()).getEmail();
-            String nickname = ((User) authentication.getPrincipal()).getNickName();
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword()));
 
-            String jwt = JwtUtils.generateAccessToken(email, nickname, id, secretKey, expiredMs);
-            String refreshToken = JwtUtils.generateRefreshToken(email, nickname, id, secretKey, refreshExpiredMs);
+            if (authentication.isAuthenticated()) {
+                Long id = ((User) authentication.getPrincipal()).getId();
+                String email = ((User) authentication.getPrincipal()).getEmail();
+                String nickname = ((User) authentication.getPrincipal()).getNickName();
 
-            redisTemplate.opsForValue().set("REFRESH_TOKEN_" + id, refreshToken, refreshExpiredMs, TimeUnit.MILLISECONDS);
+                String jwt = JwtUtils.generateAccessToken(email, nickname, id, secretKey, expiredMs);
+                String refreshToken = JwtUtils.generateRefreshToken(email, nickname, id, secretKey, refreshExpiredMs);
 
-            PostLoginUserDtoRes loginRes = PostLoginUserDtoRes.builder()
-                    .token(jwt)
-                    .refreshToken(refreshToken)
-                    .build();
+                redisTemplate.opsForValue().set("REFRESH_TOKEN_" + id, refreshToken, refreshExpiredMs, TimeUnit.MILLISECONDS);
 
-            return loginRes;
+                PostLoginUserDtoRes loginRes = PostLoginUserDtoRes.builder()
+                        .token(jwt)
+                        .refreshToken(refreshToken)
+                        .build();
+
+                return loginRes;
+            }
+        } catch (UsernameNotFoundException e) {
+            throw new UserException(ErrorCode.USER_NOT_SIGNIN);
+        } catch (BadCredentialsException e) {
+            throw new UserException(ErrorCode.PASSWORD_FAIL);
+        } catch (Exception e) {
+            throw new UserException(ErrorCode.AUTHENTICATION_FAIL);
         }
         throw new UserException(ErrorCode.AUTHENTICATION_FAIL);
     }
+
 
     public PostLoginUserDtoRes refreshToken(String refreshToken) {
         Claims claims = JwtUtils.extractAllClaims(refreshToken, secretKey);
