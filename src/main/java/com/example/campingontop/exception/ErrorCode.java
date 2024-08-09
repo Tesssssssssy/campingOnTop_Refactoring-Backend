@@ -17,6 +17,8 @@ public enum ErrorCode {
     INVALID_PERMISSION(HttpStatus.UNAUTHORIZED, "권한이 없습니다."),
     UNAUTHORIZED_EMAIL(HttpStatus.UNAUTHORIZED, "이메일 인증을 하지 않았습니다."),
     AUTHENTICATION_FAIL(HttpStatus.UNAUTHORIZED, "사용자 인증 실패"),
+    USER_NOT_SIGNIN(HttpStatus.UNAUTHORIZED, "가입되지 않은 이메일입니다."),
+    PASSWORD_FAIL(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
 
 
 
