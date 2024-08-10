@@ -4,6 +4,7 @@ import com.example.campingontop.domain.mysql.cart.model.QCart;
 import com.example.campingontop.domain.mysql.orders.model.QOrderedHouse;
 import com.example.campingontop.domain.mysql.review.model.QReview;
 import com.example.campingontop.domain.mysql.review.model.Review;
+import com.example.campingontop.domain.mysql.user.model.QUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
@@ -23,12 +24,12 @@ public class ReviewRepositoryCustomImpl extends QuerydslRepositorySupport implem
     public List<Review> findReviewByUserId(Long userId) {
         QReview qReview = new QReview("Review");
         QOrderedHouse qOrderedHouse = new QOrderedHouse("OrderedHouse");
-        QCart qCart = new QCart("Cart");
+        QUser qUser = QUser.user;
 
         return from(qReview)
                 .leftJoin(qReview.orderedHouse, qOrderedHouse).fetchJoin()
-                .leftJoin(qOrderedHouse.cart, qCart).fetchJoin()
-                .where(qReview.status.eq(true).and(qCart.user.id.eq(userId)))
+                .where(qReview.status.eq(true)
+                        .and(qReview.user.id.eq(userId)))
                 .fetch();
     }
 
