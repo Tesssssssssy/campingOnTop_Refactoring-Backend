@@ -1,0 +1,39 @@
+server:
+  port: 9999
+
+  application:
+    name: CAMPINGONTOP-GATEWAY-SERVICE
+
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PATCH
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+
+      routes:
+        - id: main-service
+          uri: lb://CAMPINGONTOP-MAIN-SERVICE
+          predicates:
+            - Path=/main/**
+
+#        - id: board-search-service
+#          uri: lb://BOOTSHELF-BOARD-SEARCH-SERVICE
+#          predicates:
+#            - Path=/search/board/**
+#
+#        - id: review-search-service
+#          uri: lb://BOOTSHELF-REVIEW-SEARCH-SERVICE
+#          predicates:
+#            - Path=/search/review/**
